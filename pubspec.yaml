@@ -1,0 +1,29 @@
+name: dchs_video_mapping
+description: Player Android offline con calibrazione video e maschere Bézier.
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: ^3.13.4
+  flutter: '>=3.47.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  video_player: 2.14.1
+  file_selector: 1.1.0
+  path_provider: ^2.1.6
+  cryptography: ^2.9.0
+  archive: ^4.5.2
+  share_plus: ^13.2.0
+  vector_math: ^2.4.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - LICENSE
+    - assets/demo.mp4
+    - assets/licenses/ANDROIDX-MEDIA3.txt

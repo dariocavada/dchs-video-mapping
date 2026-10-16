@@ -96,6 +96,25 @@ void main() {
       expect(await File('${root.path}/$path').readAsBytes(), [5, 6]);
     },
   );
+  test(
+    'staged media keeps its container extension for Apple decoders',
+    () async {
+      final path = await MediaImporter(root).import(
+        Stream.value([5, 6, 7]),
+        'MP4',
+        validate: (file) async {
+          if (!file.path.endsWith('.mp4')) {
+            throw const FormatException(
+              'Decoder requires a container extension',
+            );
+          }
+          expect(await file.readAsBytes(), [5, 6, 7]);
+        },
+      );
+      expect(await File('${root.path}/$path').readAsBytes(), [5, 6, 7]);
+      expect((await Directory('${root.path}/media').list().toList()).length, 2);
+    },
+  );
   test('PIN is private, no default, verification survives reload', () async {
     final a = await OperatorAccess.load(root);
     expect(a.isSet, false);

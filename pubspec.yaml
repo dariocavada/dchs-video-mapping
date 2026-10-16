@@ -1,5 +1,5 @@
 name: dchs_video_mapping
-description: Offline Android player with video calibration and Bézier masks.
+description: Offline video mapping player for Android, iOS and macOS with Bézier masks.
 publish_to: none
 version: 1.0.0+1
 environment:

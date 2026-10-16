@@ -15,7 +15,7 @@ class PlaybackController extends ChangeNotifier {
     required this.log,
     PlaybackBackend Function()? createBackend,
     Duration pollInterval = const Duration(seconds: 1),
-  }) : _create = createBackend ?? AndroidVideoBackend.new {
+  }) : _create = createBackend ?? NativeVideoBackend.new {
     _timer = Timer.periodic(pollInterval, (_) => _poll());
   }
   final HealthLog log;

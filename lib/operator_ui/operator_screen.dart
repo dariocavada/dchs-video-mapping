@@ -7,6 +7,7 @@ import '../mapping/editor_controller.dart';
 import '../mapping/mask.dart';
 import '../presets/preset.dart';
 import '../playback/playback_controller.dart';
+import 'keyboard_shortcuts.dart';
 import 'mapping_canvas.dart';
 import 'player_theme.dart';
 
@@ -217,12 +218,12 @@ class _OperatorScreenState extends State<OperatorScreen> {
       _nudge(direction);
       return KeyEventResult.handled;
     }
-    if (HardwareKeyboard.instance.isControlPressed &&
+    if (isPlayerShortcutPressed &&
         event.logicalKey == LogicalKeyboardKey.keyZ) {
       HardwareKeyboard.instance.isShiftPressed ? e.redo() : e.undo();
       return KeyEventResult.handled;
     }
-    if (HardwareKeyboard.instance.isControlPressed &&
+    if (isPlayerShortcutPressed &&
         event.logicalKey == LogicalKeyboardKey.keyS) {
       widget.onSave();
       return KeyEventResult.handled;
@@ -746,7 +747,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
       PlayerButton('Kiosk status', onPressed: () => widget.onSystem('kiosk')),
       _gap(24),
       _note(
-        'Access from projection: hold the top-left corner for 3 seconds, or press Ctrl + M, then enter the PIN.',
+        'Access from projection: hold the top-left corner for 3 seconds, or press Ctrl + M (⌘ + M on Mac), then enter the PIN.',
       ),
     ],
   );

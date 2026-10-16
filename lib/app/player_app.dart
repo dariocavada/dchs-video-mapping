@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -18,6 +19,7 @@ import '../playback/playback_controller.dart';
 import '../presets/preset.dart';
 import '../presets/preset_repository.dart';
 import '../output/projection_surface.dart';
+import '../operator_ui/keyboard_shortcuts.dart';
 import '../operator_ui/operator_screen.dart';
 import '../operator_ui/player_theme.dart';
 import '../operator_ui/text_prompt_dialog.dart';
@@ -388,6 +390,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
             label: 'Video',
             mimeTypes: ['video/*'],
             extensions: ['mp4', 'mov', 'm4v', 'mkv', 'webm'],
+            uniformTypeIdentifiers: ['public.movie'],
           ),
         ],
       );
@@ -399,7 +402,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
         file.openRead(),
         extension,
         validate: (f) async {
-          final candidate = AndroidVideoBackend();
+          final candidate = NativeVideoBackend();
           try {
             await candidate.initialize(f).timeout(const Duration(seconds: 20));
           } finally {
@@ -536,6 +539,15 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       return;
     }
     if (action == 'kiosk') {
+      if (!Platform.isAndroid) {
+        await _message(
+          'Kiosk status',
+          Platform.isIOS
+              ? 'Use Guided Access or supervised Single App Mode to restrict access on iPhone/iPad. The app does not enable these modes automatically.'
+              : 'Full screen does not lock this Mac. Configure installation access and automatic login through macOS device management.',
+        );
+        return;
+      }
       final locked = await PlatformOutput.kiosk('status');
       await _message(
         'Kiosk status',
@@ -564,10 +576,15 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
           'configuration and logs; media and PIN excluded',
         );
         await SupportArchive.write(s.root, file, s.editor.draft);
+        if (!mounted) return;
+        final box = context.findRenderObject() as RenderBox?;
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(file.path, mimeType: 'application/zip')],
             subject: 'DCHS Video Mapping · configuration and logs',
+            sharePositionOrigin: box == null
+                ? null
+                : box.localToGlobal(Offset.zero) & box.size,
           ),
         );
       });
@@ -588,7 +605,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
         onKeyEvent: (node, event) {
           if (event is KeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.keyM &&
-              HardwareKeyboard.instance.isControlPressed) {
+              isPlayerShortcutPressed) {
             unawaited(_access());
             return KeyEventResult.handled;
           }

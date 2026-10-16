@@ -1,31 +1,73 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dchs_video_mapping/app/player_app.dart';
 import 'package:dchs_video_mapping/mapping/geometry.dart';
 import 'package:dchs_video_mapping/infrastructure/media_import.dart';
+import 'package:dchs_video_mapping/infrastructure/platform_output.dart';
 import 'package:dchs_video_mapping/playback/playback_backend.dart';
 import 'package:dchs_video_mapping/presets/preset.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
-    'Android video texture: affine, Bezier, quad, loop, PIN and persisted startup',
+    'Native video texture: affine, Bezier, quad, loop, PIN and persisted startup',
     (tester) async {
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      final displayKey = await PlatformOutput.displayKey();
+      expect(displayKey, isNot('display-unknown'));
+      const screenshotPlatform = String.fromEnvironment('SCREENSHOT_PLATFORM');
+      final platform = screenshotPlatform.isNotEmpty
+          ? screenshotPlatform
+          : Platform.isMacOS
+          ? 'macos'
+          : Platform.isIOS
+          ? 'ios'
+          : 'android';
+      final screenshotKey = GlobalKey();
+      Widget app(PlayerSession session) => RepaintBoundary(
+        key: screenshotKey,
+        child: PlayerApp(session: session),
+      );
+      Future<void> screenshot(String name) async {
+        if (Platform.isMacOS) {
+          // integration_test has no native macOS screenshot plugin. Capture the
+          // rendered Flutter surface, including the actual video texture.
+          final boundary =
+              screenshotKey.currentContext!.findRenderObject()!
+                  as RenderRepaintBoundary;
+          final image = await boundary.toImage(pixelRatio: 1);
+          final data = await image.toByteData(format: ui.ImageByteFormat.png);
+          image.dispose();
+          binding.reportData ??= <String, dynamic>{};
+          final screenshots = binding.reportData!.putIfAbsent(
+            'screenshots',
+            () => <dynamic>[],
+          ) as List<dynamic>;
+          screenshots.add(<String, dynamic>{
+            'screenshotName': '$name-$platform',
+            'bytes': data!.buffer.asUint8List(),
+          });
+        } else {
+          await binding.takeScreenshot('$name-$platform');
+        }
+      }
+
       final support = await getApplicationSupportDirectory(),
           root = Directory('${support.path}/player-integration');
       if (await root.exists()) await root.delete(recursive: true);
       final session = await PlayerSession.open(root);
-      await tester.pumpWidget(PlayerApp(session: session));
+      await tester.pumpWidget(app(session));
       Future<void> frames([int ms = 400]) async {
         await tester.pump(Duration(milliseconds: ms));
         await tester.pump();
@@ -35,7 +77,7 @@ void main() {
       expect(find.byKey(const ValueKey('setup-player')), findsOneWidget);
       await binding.convertFlutterSurfaceToImage();
       await frames();
-      await binding.takeScreenshot('00-player-setup-android');
+      await screenshot('00-player-setup');
       await tester.tap(find.byKey(const ValueKey('setup-player')));
       await frames();
       await tester.enterText(
@@ -57,20 +99,26 @@ void main() {
         await frames(200);
       }
       expect(find.byKey(const ValueKey('tab-mask')), findsOneWidget);
-      // A test device may use a raster different from the initial preset.
-      final recalibrate = find.text('Recalibrate output');
-      if (recalibrate.evaluate().isNotEmpty) {
-        await tester.tap(recalibrate);
+      // A desktop window can move to another display while the test is running.
+      // Confirm that output just as an operator must before saving calibration.
+      Future<void> acceptOutputIfNeeded() async {
         await frames();
-        await tester.tap(find.byKey(const ValueKey('confirm-action')));
-        await frames();
+        final recalibrate = find.text('Recalibrate output');
+        if (recalibrate.evaluate().isNotEmpty) {
+          await tester.tap(recalibrate);
+          await frames();
+          await tester.tap(find.byKey(const ValueKey('confirm-action')));
+          await frames();
+        }
       }
+
+      await acceptOutputIfNeeded();
       expect(session.playback.visible, true);
       final imported = await MediaImporter(root).import(
         File('${root.path}/media/demo.mp4').openRead(),
         'mp4',
         validate: (file) async {
-          final b = AndroidVideoBackend();
+          final b = NativeVideoBackend();
           try {
             await b.initialize(file);
           } finally {
@@ -94,7 +142,7 @@ void main() {
       await frames(50);
       expect(session.playback.snapshot.position, isNot(before));
       await frames();
-      await binding.takeScreenshot('01-player-geometry-android');
+      await screenshot('01-player-geometry');
       await tester.tap(find.byKey(const ValueKey('tab-mask')));
       await frames();
       await tester.tap(find.byKey(const ValueKey('mask-arch')));
@@ -125,7 +173,7 @@ void main() {
       await frames();
       expect(
         session.editor.draft.mask.nodes.first.outHandle.dy,
-        closeTo(handle.dy - 1 / 1080, 1e-9),
+        closeTo(handle.dy - 1 / session.editor.draft.outputSize.height, 1e-9),
       );
       await tester.tap(find.byKey(const ValueKey('mask-add')));
       await frames();
@@ -136,7 +184,7 @@ void main() {
       await frames();
       expect(session.editor.draft.mask.nodes.length, 5);
       expect(session.editor.canSave, true);
-      await binding.takeScreenshot('02-player-bezier-mask-android');
+      await screenshot('02-player-bezier-mask');
       await tester.tap(find.byKey(const ValueKey('save-preset')));
       await frames();
       for (var i = 0; i < 20 && session.editor.dirty; i++) {
@@ -149,7 +197,7 @@ void main() {
       await frames();
       expect(find.byKey(const ValueKey('public-output')), findsOneWidget);
       expect(find.text('Save preset'), findsNothing);
-      await binding.takeScreenshot('03-player-bezier-projection-android');
+      await screenshot('03-player-bezier-projection');
       // Curve affects clipping only: source affine mapping remains identity.
       final m = mappingMatrix(
         session.editor.draft,
@@ -188,6 +236,7 @@ void main() {
         await frames(200);
       }
       expect(find.byKey(const ValueKey('tab-geometry')), findsOneWidget);
+      await acceptOutputIfNeeded();
       session.editor.setMode(MappingMode.quad);
       session.editor.change(
         session.editor.draft.copyWith(
@@ -202,7 +251,8 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('tab-geometry')));
       await frames();
       expect(session.editor.canSave, true);
-      await binding.takeScreenshot('04-player-four-corners-android');
+      await acceptOutputIfNeeded();
+      await screenshot('04-player-four-corners');
       // Actual animated texture, not a substitute pattern, is rendered through H.
       await tester.tap(find.byKey(const ValueKey('save-preset')));
       await frames();
@@ -212,7 +262,7 @@ void main() {
       expect(session.editor.dirty, false);
       await tester.tap(find.byKey(const ValueKey('only-projection')));
       await frames();
-      await binding.takeScreenshot('05-player-quad-projection-android');
+      await screenshot('05-player-quad-projection');
       final reopen = await session.repository.loadActive();
       expect(reopen!.mode, MappingMode.quad);
       expect(reopen.corners, const [
@@ -224,7 +274,7 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await session.close();
       final restarted = await PlayerSession.open(root);
-      await tester.pumpWidget(PlayerApp(session: restarted));
+      await tester.pumpWidget(app(restarted));
       await frames();
       expect(find.byKey(const ValueKey('public-output')), findsOneWidget);
       expect(restarted.editor.draft.mode, MappingMode.quad);

@@ -16,7 +16,7 @@ abstract class PlaybackBackend extends ChangeNotifier {
   Future<void> close();
 }
 
-class AndroidVideoBackend extends PlaybackBackend {
+class NativeVideoBackend extends PlaybackBackend {
   VideoPlayerController? _controller;
   Widget _surface = const SizedBox.shrink();
   @override

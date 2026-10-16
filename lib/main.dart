@@ -19,9 +19,11 @@ Future<void> main() async {
     yield LicenseEntryWithLineBreaks([
       'DCHS Video Mapping',
     ], await rootBundle.loadString('LICENSE'));
-    yield LicenseEntryWithLineBreaks([
-      'AndroidX Media3 1.9.2',
-    ], await rootBundle.loadString('assets/licenses/ANDROIDX-MEDIA3.txt'));
+    if (Platform.isAndroid) {
+      yield LicenseEntryWithLineBreaks([
+        'AndroidX Media3 1.9.2',
+      ], await rootBundle.loadString('assets/licenses/ANDROIDX-MEDIA3.txt'));
+    }
   });
   try {
     final support = await getApplicationSupportDirectory();

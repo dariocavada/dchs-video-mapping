@@ -13,7 +13,10 @@ class MediaImporter {
     }
     await Directory('${root.path}/media').create(recursive: true);
     final name = 'video-${DateTime.now().microsecondsSinceEpoch}';
-    final temp = File('${root.path}/media/$name.tmp'),
+    // AVFoundation uses the container extension when opening a local file.
+    final temp = File(
+          '${root.path}/media/$name.pending.${extension.toLowerCase()}',
+        ),
         path = 'media/$name.${extension.toLowerCase()}';
     try {
       final sink = temp.openWrite();

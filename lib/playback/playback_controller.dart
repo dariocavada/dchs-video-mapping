@@ -78,7 +78,7 @@ class PlaybackController extends ChangeNotifier {
     } catch (e) {
       await candidate.close();
       if (token == _generation && !_closed) {
-        diagnostic = 'Impossibile aprire il video: $e';
+        diagnostic = 'Cannot open video: $e';
         if (old == null || recovery) phase = PlaybackPhase.error;
         unawaited(log.write('media_error', diagnostic));
       }
@@ -146,7 +146,7 @@ class PlaybackController extends ChangeNotifier {
     final action = watchdog.check(snapshot, _clock.elapsedMilliseconds);
     if (action == WatchdogAction.fail) {
       phase = PlaybackPhase.error;
-      diagnostic = 'Riproduzione interrotta dopo tre tentativi di recupero.';
+      diagnostic = 'Playback stopped after three recovery attempts.';
       unawaited(backend!.pause());
       unawaited(log.write('recovery_exhausted', diagnostic));
       notifyListeners();
@@ -159,7 +159,7 @@ class PlaybackController extends ChangeNotifier {
     phase = PlaybackPhase.recovering;
     notifyListeners();
     final generation = _generation;
-    unawaited(log.write('recovery', 'tentativo ${watchdog.attempts}'));
+    unawaited(log.write('recovery', 'attempt ${watchdog.attempts}'));
     await Future<void>.delayed(Duration(seconds: watchdog.delaySeconds));
     if (!_closed && generation == _generation) {
       await open(_file!, _preset!, recovery: true);

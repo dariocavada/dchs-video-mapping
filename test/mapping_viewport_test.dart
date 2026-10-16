@@ -38,7 +38,7 @@ void main() {
               onImport: () async {},
               onPreset: (_) async {},
               onSystem: (_) async {},
-              status: 'Pronto',
+              status: 'Ready',
               outputWarning: null,
               onAcceptOutput: () {},
             ),

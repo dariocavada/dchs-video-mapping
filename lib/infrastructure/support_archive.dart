@@ -42,7 +42,7 @@ class _ArchiveWorker {
       final bytes = utf8.encode(
         const JsonEncoder.withIndent('  ').convert(draft.toJson()),
       );
-      encoder.addArchiveFile(ArchiveFile('bozza.json', bytes.length, bytes));
+      encoder.addArchiveFile(ArchiveFile('draft.json', bytes.length, bytes));
       final logs = Directory('${root.path}/logs');
       if (await logs.exists()) {
         await for (final file in logs.list()) {

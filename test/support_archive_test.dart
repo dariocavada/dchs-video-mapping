@@ -21,7 +21,7 @@ void main() {
       final archive = ZipDecoder().decodeBytes(await zip.readAsBytes());
       expect(archive.files.map((f) => f.name).toSet(), {
         'presets.json',
-        'bozza.json',
+        'draft.json',
         'logs/player.log',
       });
       await root.delete(recursive: true);

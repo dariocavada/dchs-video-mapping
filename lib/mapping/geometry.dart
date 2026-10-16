@@ -8,13 +8,13 @@ import '../presets/preset.dart';
 Offset projectPoint(Matrix4 m, Offset p) {
   final v = m * Vector4(p.dx, p.dy, 0, 1);
   if (v.w.abs() < 1e-12) {
-    throw const FormatException('Trasformazione singolare');
+    throw const FormatException('Singular transform');
   }
   return Offset(v.x / v.w, v.y / v.w);
 }
 
 String? validateQuad(List<Offset> p, Size size) {
-  if (p.length != 4) return 'Occorrono quattro angoli.';
+  if (p.length != 4) return 'Four corners are required.';
   for (final v in p) {
     if (!v.dx.isFinite ||
         !v.dy.isFinite ||
@@ -22,7 +22,7 @@ String? validateQuad(List<Offset> p, Size size) {
         v.dx > 1 ||
         v.dy < 0 ||
         v.dy > 1) {
-      return 'Angoli fuori dal raster.';
+      return 'Corners outside the raster.';
     }
   }
   var sign = 0.0, area = 0.0;
@@ -30,13 +30,13 @@ String? validateQuad(List<Offset> p, Size size) {
     final a = p[i], b = p[(i + 1) % 4], c = p[(i + 2) % 4];
     final cross = (b.dx - a.dx) * (c.dy - b.dy) - (b.dy - a.dy) * (c.dx - b.dx);
     if (cross.abs() < 1e-8 || (sign != 0 && sign * cross < 0)) {
-      return 'Il quadrilatero deve essere convesso e non incrociato.';
+      return 'The quadrilateral must be convex and must not self-intersect.';
     }
     sign = cross;
     area += a.dx * b.dy - b.dx * a.dy;
   }
   if (area.abs() * size.width * size.height / 2 < 16) {
-    return 'Area del quadrilatero insufficiente.';
+    return 'The quadrilateral area is too small.';
   }
   return null;
 }
@@ -72,7 +72,7 @@ Matrix4 mappingMatrix(ProjectionPreset p, Size size) {
       if (a[r][col].abs() > a[pivot][col].abs()) pivot = r;
     }
     if (a[pivot][col].abs() < 1e-12) {
-      throw const FormatException('Omografia singolare');
+      throw const FormatException('Singular homography');
     }
     final tmp = a[col];
     a[col] = a[pivot];

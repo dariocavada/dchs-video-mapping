@@ -58,7 +58,7 @@ void main() {
       }
       expect(find.byKey(const ValueKey('tab-mask')), findsOneWidget);
       // A test device may use a raster different from the initial preset.
-      final recalibrate = find.text('Ricalibra output');
+      final recalibrate = find.text('Recalibrate output');
       if (recalibrate.evaluate().isNotEmpty) {
         await tester.tap(recalibrate);
         await frames();
@@ -94,7 +94,7 @@ void main() {
       await frames(50);
       expect(session.playback.snapshot.position, isNot(before));
       await frames();
-      await binding.takeScreenshot('01-player-geometria-android');
+      await binding.takeScreenshot('01-player-geometry-android');
       await tester.tap(find.byKey(const ValueKey('tab-mask')));
       await frames();
       await tester.tap(find.byKey(const ValueKey('mask-arch')));
@@ -118,7 +118,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('undo')));
       await frames();
       expect(session.editor.draft.mask.nodes.first.position, original);
-      await tester.tap(find.text('Uscente'));
+      await tester.tap(find.text('Outgoing'));
       await frames();
       final handle = session.editor.draft.mask.nodes.first.outHandle;
       await tester.tap(find.text('↑'));
@@ -136,7 +136,7 @@ void main() {
       await frames();
       expect(session.editor.draft.mask.nodes.length, 5);
       expect(session.editor.canSave, true);
-      await binding.takeScreenshot('02-player-maschera-bezier-android');
+      await binding.takeScreenshot('02-player-bezier-mask-android');
       await tester.tap(find.byKey(const ValueKey('save-preset')));
       await frames();
       for (var i = 0; i < 20 && session.editor.dirty; i++) {
@@ -148,8 +148,8 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('only-projection')));
       await frames();
       expect(find.byKey(const ValueKey('public-output')), findsOneWidget);
-      expect(find.text('Salva preset'), findsNothing);
-      await binding.takeScreenshot('03-player-proiezione-bezier-android');
+      expect(find.text('Save preset'), findsNothing);
+      await binding.takeScreenshot('03-player-bezier-projection-android');
       // Curve affects clipping only: source affine mapping remains identity.
       final m = mappingMatrix(
         session.editor.draft,
@@ -202,7 +202,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('tab-geometry')));
       await frames();
       expect(session.editor.canSave, true);
-      await binding.takeScreenshot('04-player-quattro-angoli-android');
+      await binding.takeScreenshot('04-player-four-corners-android');
       // Actual animated texture, not a substitute pattern, is rendered through H.
       await tester.tap(find.byKey(const ValueKey('save-preset')));
       await frames();
@@ -212,7 +212,7 @@ void main() {
       expect(session.editor.dirty, false);
       await tester.tap(find.byKey(const ValueKey('only-projection')));
       await frames();
-      await binding.takeScreenshot('05-player-proiezione-quad-android');
+      await binding.takeScreenshot('05-player-quad-projection-android');
       final reopen = await session.repository.loadActive();
       expect(reopen!.mode, MappingMode.quad);
       expect(reopen.corners, const [

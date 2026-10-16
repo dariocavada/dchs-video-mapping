@@ -44,7 +44,7 @@ class _PlayerTextPromptState extends State<PlayerTextPrompt> {
         maxLength: widget.pin ? 12 : 120,
         keyboardType: widget.pin ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
-          labelText: widget.pin ? 'Da 6 a 12 cifre' : 'Nome',
+          labelText: widget.pin ? '6 to 12 digits' : 'Name',
         ),
         onSubmitted: (value) => Navigator.pop(context, value),
       ),
@@ -52,12 +52,12 @@ class _PlayerTextPromptState extends State<PlayerTextPrompt> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Annulla'),
+        child: const Text('Cancel'),
       ),
       TextButton(
         key: const ValueKey('dialog-confirm'),
         onPressed: () => Navigator.pop(context, _controller.text),
-        child: const Text('Conferma'),
+        child: const Text('Confirm'),
       ),
     ],
   );

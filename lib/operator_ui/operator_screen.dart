@@ -89,12 +89,12 @@ class _OperatorScreenState extends State<OperatorScreen> {
     mainAxisSize: MainAxisSize.min,
     children: [
       Text(
-        'Vista',
+        'View',
         style: TextStyle(fontSize: 14, color: PlayerTheme.onSurfaceVariant),
       ),
       IconButton(
         key: const ValueKey('view-zoom-out'),
-        tooltip: 'Riduci la vista dell’editor',
+        tooltip: 'Zoom out in the editor',
         onPressed: () => _zoomView(.8),
         icon: const Icon(Icons.zoom_out),
       ),
@@ -108,28 +108,26 @@ class _OperatorScreenState extends State<OperatorScreen> {
       ),
       IconButton(
         key: const ValueKey('view-zoom-in'),
-        tooltip: 'Ingrandisci la vista dell’editor',
+        tooltip: 'Zoom in on the editor',
         onPressed: () => _zoomView(1.25),
         icon: const Icon(Icons.zoom_in),
       ),
       IconButton(
         key: const ValueKey('view-fit-output'),
-        tooltip: 'Inquadra output',
+        tooltip: 'Fit output',
         onPressed: _fitOutput,
         icon: const Icon(Icons.fit_screen),
       ),
       if (_tab == 'mask')
         IconButton(
           key: const ValueKey('view-fit-handles'),
-          tooltip: 'Inquadra tutte le maniglie',
+          tooltip: 'Fit all handles',
           onPressed: _fitHandles,
           icon: const Icon(Icons.crop_free),
         ),
       IconButton(
         key: const ValueKey('view-pan'),
-        tooltip: _panView
-            ? 'Torna a modificare i punti'
-            : 'Sposta solo la vista',
+        tooltip: _panView ? 'Return to editing points' : 'Pan the view only',
         isSelected: _panView,
         onPressed: () => setState(() {
           _panView = !_panView;
@@ -289,52 +287,52 @@ class _OperatorScreenState extends State<OperatorScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title('La sorgente'),
+        _title('Source'),
         _gap(),
         _note(p.mediaPath),
         _gap(),
         PlayerButton(
-          'Scegli video locale',
+          'Choose local video',
           key: const ValueKey('import-video'),
           icon: Icons.folder_open,
           onPressed: () => widget.onImport(),
         ),
         _gap(),
-        _note('Il file viene copiato e verificato prima di essere applicato.'),
+        _note('The file is copied and checked before it is applied.'),
         _gap(22),
         DropdownButtonFormField<VideoFit>(
           initialValue: p.fit,
-          decoration: const InputDecoration(labelText: 'Adattamento'),
+          decoration: const InputDecoration(labelText: 'Fit'),
           items: const [
             DropdownMenuItem(
               value: VideoFit.contain,
-              child: Text('Intero · contain'),
+              child: Text('Contain · whole image'),
             ),
             DropdownMenuItem(
               value: VideoFit.cover,
-              child: Text('Riempi · cover'),
+              child: Text('Cover · fill output'),
             ),
             DropdownMenuItem(
               value: VideoFit.stretch,
-              child: Text('Deforma · stretch'),
+              child: Text('Stretch · distort image'),
             ),
           ],
           onChanged: (v) => e.change(p.copyWith(fit: v)),
         ),
         _gap(),
         _check(
-          'Retroproiezione · specchio',
+          'Rear projection · mirror',
           p.flip,
           (v) => e.change(p.copyWith(flip: v)),
         ),
         _check(
-          'Avvia il video all’apertura',
+          'Play video when opened',
           p.autoplay,
           (v) => e.change(p.copyWith(autoplay: v)),
         ),
         _gap(),
         _note(
-          'MP4 H.264 / AAC · riferimento Full HD. Il supporto degli altri codec va provato sul dispositivo.',
+          'MP4 H.264 / AAC · Full HD reference. Test other codecs on the device.',
         ),
       ],
     );
@@ -345,15 +343,12 @@ class _OperatorScreenState extends State<OperatorScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title('Disponi il video'),
+        _title('Position the video'),
         _gap(),
         SegmentedButton<MappingMode>(
           segments: const [
-            ButtonSegment(value: MappingMode.affine, label: Text('Base')),
-            ButtonSegment(
-              value: MappingMode.quad,
-              label: Text('Quattro angoli'),
-            ),
+            ButtonSegment(value: MappingMode.affine, label: Text('Basic')),
+            ButtonSegment(value: MappingMode.quad, label: Text('Four corners')),
           ],
           selected: {p.mode},
           onSelectionChanged: (v) {
@@ -370,7 +365,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
         if (p.mode == MappingMode.affine) ...[
           _row([
             _number(
-              'Centro X · px',
+              'Center X · px',
               p.center.dx * s.width,
               (v) => e.change(
                 p.copyWith(center: Offset(v / s.width, p.center.dy)),
@@ -379,7 +374,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
               max: s.width * 2,
             ),
             _number(
-              'Centro Y · px',
+              'Center Y · px',
               p.center.dy * s.height,
               (v) => e.change(
                 p.copyWith(center: Offset(p.center.dx, v / s.height)),
@@ -391,7 +386,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
           _gap(),
           _row([
             _number(
-              'Scala X · %',
+              'Scale X · %',
               p.scaleX * 100,
               (v) => e.change(
                 p.copyWith(
@@ -403,7 +398,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
               max: 400,
             ),
             _number(
-              'Scala Y · %',
+              'Scale Y · %',
               p.scaleY * 100,
               (v) => e.change(
                 p.copyWith(
@@ -417,14 +412,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
           ]),
           _gap(),
           _number(
-            'Rotazione · °',
+            'Rotation · °',
             p.rotation,
             (v) => e.change(p.copyWith(rotation: v)),
             min: -180,
             max: 180,
           ),
           _check(
-            'Mantieni proporzioni',
+            'Keep aspect ratio',
             _linked,
             (v) => setState(() {
               _linked = v;
@@ -432,7 +427,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
             }),
           ),
         ] else ...[
-          _note('Angolo selezionato'),
+          _note('Selected corner'),
           _gap(8),
           _row([
             for (var i = 0; i < 4; i++)
@@ -444,7 +439,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
           _gap(),
           _row([
             _number(
-              'Angolo X · px',
+              'Corner X · px',
               p.corners[_selected.clamp(0, 3)].dx * s.width,
               (v) {
                 final c = p.corners.toList();
@@ -458,7 +453,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
               max: s.width,
             ),
             _number(
-              'Angolo Y · px',
+              'Corner Y · px',
               p.corners[_selected.clamp(0, 3)].dy * s.height,
               (v) {
                 final c = p.corners.toList();
@@ -474,7 +469,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
           ]),
           _gap(),
           _note(
-            'Trascina un angolo. La griglia e il video condividono la stessa prospettiva.',
+            'Drag a corner. The grid and video share the same perspective.',
           ),
           _gap(12),
         ],
@@ -482,7 +477,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
         _nudgePad(),
         _gap(),
         _note(
-          'Trascina nell’anteprima per spostare. Frecce: 1 px; Maiusc + frecce: 10 px.',
+          'Drag in the preview to move. Arrow keys: 1 px; Shift + arrows: 10 px.',
         ),
       ],
     );
@@ -510,21 +505,21 @@ class _OperatorScreenState extends State<OperatorScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _title('Sagoma Bézier'),
+        _title('Bézier mask'),
         _check(
-          'Maschera attiva',
+          'Enable mask',
           p.mask.enabled,
           (v) => e.change(p.copyWith(mask: p.mask.copyWith(enabled: v))),
           key: const ValueKey('mask-enable'),
         ),
         _row([
           PlayerButton(
-            'Arco',
+            'Arch',
             key: const ValueKey('mask-arch'),
             onPressed: () => _replaceMask(BezierMask.arch()),
           ),
           PlayerButton(
-            'Rettangolo',
+            'Rectangle',
             onPressed: () =>
                 _replaceMask(BezierMask.rectangle().copyWith(enabled: true)),
           ),
@@ -540,7 +535,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
           ),
           Center(
             child: Text(
-              'Nodo ${_selected + 1} / ${p.mask.nodes.length}',
+              'Node ${_selected + 1} / ${p.mask.nodes.length}',
               style: const TextStyle(fontSize: 19),
             ),
           ),
@@ -557,12 +552,12 @@ class _OperatorScreenState extends State<OperatorScreen> {
           segments: const [
             ButtonSegment(
               value: SelectedPart.inHandle,
-              label: Text('Entrante'),
+              label: Text('Incoming'),
             ),
-            ButtonSegment(value: SelectedPart.node, label: Text('Nodo')),
+            ButtonSegment(value: SelectedPart.node, label: Text('Node')),
             ButtonSegment(
               value: SelectedPart.outHandle,
-              label: Text('Uscente'),
+              label: Text('Outgoing'),
             ),
           ],
           selected: {_part},
@@ -571,14 +566,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
         _gap(18),
         _row([
           _number(
-            'Punto X · px',
+            'Point X · px',
             point.dx * s.width,
             (v) => coordinate(Offset(v / s.width, point.dy)),
             min: _part == SelectedPart.node ? 0 : -s.width,
             max: _part == SelectedPart.node ? s.width : s.width * 2,
           ),
           _number(
-            'Punto Y · px',
+            'Point Y · px',
             point.dy * s.height,
             (v) => coordinate(Offset(point.dx, v / s.height)),
             min: _part == SelectedPart.node ? 0 : -s.height,
@@ -586,14 +581,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
           ),
         ]),
         _gap(8),
-        _check('Nodo morbido', n.mode == NodeMode.smooth, (v) {
+        _check('Smooth node', n.mode == NodeMode.smooth, (v) {
           var node = n.copyWith(mode: v ? NodeMode.smooth : NodeMode.corner);
           if (v) node = node.moveHandle(true, node.outHandle);
           e.change(p.copyWith(mask: p.mask.replace(_selected, node)));
         }),
         _row([
           PlayerButton(
-            _add ? 'Tocca la curva…' : 'Aggiungi nodo',
+            _add ? 'Tap the curve…' : 'Add node',
             key: const ValueKey('mask-add'),
             onPressed: p.mask.nodes.length < 32
                 ? () => setState(() {
@@ -603,7 +598,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
                 : null,
           ),
           PlayerButton(
-            'Elimina nodo',
+            'Delete node',
             onPressed: p.mask.nodes.length > 3
                 ? () {
                     e.deleteNode(_selected);
@@ -621,7 +616,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
         _nudgePad(),
         _gap(14),
         _note(
-          'Cerchi: nodi. Quadrati: maniglie. La curva ritaglia il video; il suo interno conserva la geometria.',
+          'Circles: nodes. Squares: handles. The curve clips the video; geometry inside is preserved.',
         ),
       ],
     );
@@ -631,17 +626,17 @@ class _OperatorScreenState extends State<OperatorScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Sostituire la sagoma?'),
-        content: const Text('Puoi annullare questa operazione con Annulla.'),
+        title: const Text('Replace mask?'),
+        content: const Text('You can undo this operation with Undo.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Indietro'),
+            child: const Text('Back'),
           ),
           TextButton(
             key: const ValueKey('confirm-mask'),
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Sostituisci'),
+            child: const Text('Replace'),
           ),
         ],
       ),
@@ -682,79 +677,76 @@ class _OperatorScreenState extends State<OperatorScreen> {
   Widget _presets() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      _title('Le calibrazioni'),
+      _title('Calibrations'),
       _gap(),
       TextFormField(
         key: ValueKey('name-${e.draft.id}'),
         initialValue: e.draft.label,
         maxLength: 120,
-        decoration: const InputDecoration(labelText: 'Nome del preset'),
+        decoration: const InputDecoration(labelText: 'Preset name'),
         onChanged: (v) {
           if (v.trim().isNotEmpty) e.change(e.draft.copyWith(label: v));
         },
       ),
       _gap(),
       PlayerButton(
-        'Salva preset',
+        'Save preset',
         onPressed: e.canSave ? () => widget.onSave() : null,
       ),
       _gap(),
       PlayerButton(
-        'Carica preset',
+        'Load preset',
         key: const ValueKey('load-preset'),
         onPressed: () => widget.onPreset('load'),
       ),
       _gap(),
       PlayerButton(
-        'Duplica con un nuovo nome',
+        'Duplicate with a new name',
         onPressed: () => widget.onPreset('duplicate'),
       ),
       _gap(),
       PlayerButton(
-        'Ripristina copia precedente',
+        'Restore previous copy',
         onPressed: () => widget.onPreset('previous'),
       ),
       _gap(),
       PlayerButton(
-        'Azzera geometria e sagoma',
+        'Reset geometry and mask',
         onPressed: () => widget.onPreset('reset'),
       ),
       _gap(24),
       _note(
-        'Il preset salva geometria, sagoma, video e audio. All’avvio viene richiamata l’ultima calibrazione salvata.',
+        'The preset saves geometry, mask, video and audio. The latest saved calibration is loaded on startup.',
       ),
     ],
   );
   Widget _system() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      _title('La postazione'),
+      _title('Installation'),
       _gap(),
       _note(
-        'Output calibrato: ${e.draft.outputSize.width.toInt()} × ${e.draft.outputSize.height.toInt()}\n${e.draft.displayKey}',
+        'Calibrated output: ${e.draft.outputSize.width.toInt()} × ${e.draft.outputSize.height.toInt()}\n${e.draft.displayKey}',
       ),
       _gap(22),
       PlayerButton(
-        'Diagnostica e log',
+        'Diagnostics and logs',
         onPressed: () => widget.onSystem('diagnostics'),
       ),
       _gap(),
       PlayerButton(
-        'Esporta configurazione e log',
+        'Export configuration and logs',
         onPressed: () => widget.onSystem('export'),
       ),
       _gap(),
-      PlayerButton(
-        'Cambia PIN personale',
-        onPressed: () => widget.onSystem('pin'),
-      ),
+      PlayerButton('Change staff PIN', onPressed: () => widget.onSystem('pin')),
       _gap(),
-      PlayerButton('Licenze', onPressed: () => widget.onSystem('licenses')),
+      PlayerButton('Licenses', onPressed: () => widget.onSystem('licenses')),
       _gap(),
-      PlayerButton('Stato kiosk', onPressed: () => widget.onSystem('kiosk')),
+      PlayerButton('Kiosk status', onPressed: () => widget.onSystem('kiosk')),
       _gap(24),
       _note(
-        'Accesso dalla proiezione: tieni premuto per 3 secondi nell’angolo alto sinistro, oppure Ctrl + M, poi inserisci il PIN.',
+        'Access from projection: hold the top-left corner for 3 seconds, or press Ctrl + M, then enter the PIN.',
       ),
     ],
   );
@@ -796,13 +788,13 @@ class _OperatorScreenState extends State<OperatorScreen> {
                           const SizedBox(width: 42),
                           const Expanded(
                             child: Text(
-                              'Calibrazione video',
+                              'Video calibration',
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 36),
                             ),
                           ),
                           Text(
-                            e.dirty ? 'Modifiche da salvare' : 'Preset salvato',
+                            e.dirty ? 'Unsaved changes' : 'Preset saved',
                             style: TextStyle(
                               fontSize: 18,
                               color: PlayerTheme.onSurfaceVariant,
@@ -810,14 +802,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
                           ),
                           const SizedBox(width: 28),
                           PlayerButton(
-                            'Salva preset',
+                            'Save preset',
                             key: const ValueKey('save-preset'),
                             icon: Icons.save_outlined,
                             onPressed: e.canSave ? () => widget.onSave() : null,
                           ),
                           const SizedBox(width: 16),
                           PlayerButton(
-                            'Solo proiezione',
+                            'Projection only',
                             key: const ValueKey('only-projection'),
                             icon: Icons.fullscreen,
                             onPressed: () => widget.onProjection(),
@@ -847,10 +839,10 @@ class _OperatorScreenState extends State<OperatorScreen> {
                                       children: [
                                         for (final (id, label) in [
                                           ('source', 'Video'),
-                                          ('geometry', 'Geometria'),
+                                          ('geometry', 'Geometry'),
                                           ('mask', 'Bézier'),
                                           ('presets', 'Preset'),
-                                          ('system', 'Sistema'),
+                                          ('system', 'System'),
                                         ])
                                           Expanded(
                                             child: TextButton(
@@ -928,14 +920,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
                                         _viewControls(),
                                         const SizedBox(width: 12),
                                         FilterChip(
-                                          label: const Text('Griglia'),
+                                          label: const Text('Grid'),
                                           selected: _pattern,
                                           onSelected: (v) =>
                                               setState(() => _pattern = v),
                                         ),
                                         const SizedBox(width: 12),
                                         FilterChip(
-                                          label: const Text('Nodi e aiuti'),
+                                          label: const Text('Nodes and guides'),
                                           selected: _helpers,
                                           onSelected: (v) =>
                                               setState(() => _helpers = v),
@@ -984,14 +976,14 @@ class _OperatorScreenState extends State<OperatorScreen> {
                                     child: Row(
                                       children: [
                                         PlayerButton(
-                                          'Annulla',
+                                          'Undo',
                                           key: const ValueKey('undo'),
                                           icon: Icons.undo,
                                           onPressed: e.canUndo ? e.undo : null,
                                         ),
                                         const SizedBox(width: 12),
                                         PlayerButton(
-                                          'Ripeti',
+                                          'Redo',
                                           icon: Icons.redo,
                                           onPressed: e.canRedo ? e.redo : null,
                                         ),
@@ -1002,9 +994,9 @@ class _OperatorScreenState extends State<OperatorScreen> {
                                                 e.geometryError ??
                                                 widget.outputWarning ??
                                                 (_add
-                                                    ? 'Tocca la curva per inserire un nodo.'
+                                                    ? 'Tap the curve to insert a node.'
                                                     : _panView
-                                                    ? 'Sposta solo la vista. Il video proiettato resta fermo.'
+                                                    ? 'Pan the view only. The projected video stays in place.'
                                                     : widget.status),
                                             maxLines: 2,
                                             style: TextStyle(
@@ -1018,7 +1010,7 @@ class _OperatorScreenState extends State<OperatorScreen> {
                                         if (widget.outputWarning != null) ...[
                                           const SizedBox(width: 12),
                                           PlayerButton(
-                                            'Ricalibra output',
+                                            'Recalibrate output',
                                             onPressed: widget.onAcceptOutput,
                                           ),
                                         ],
@@ -1140,7 +1132,7 @@ class _PlaybackBar extends StatelessWidget {
         child: Row(
           children: [
             PlayerButton(
-              s.playing ? 'Pausa' : 'Riproduci',
+              s.playing ? 'Pause' : 'Play',
               key: const ValueKey('play-pause'),
               icon: s.playing ? Icons.pause : Icons.play_arrow,
               onPressed: s.ready ? () => playback.toggle() : null,
@@ -1179,7 +1171,7 @@ class _PlaybackBar extends StatelessWidget {
             ),
             const SizedBox(width: 18),
             IconButton(
-              tooltip: p.volume == 0 ? 'Attiva audio' : 'Muto',
+              tooltip: p.volume == 0 ? 'Unmute' : 'Mute',
               onPressed: () {
                 editor.change(p.copyWith(volume: p.volume == 0 ? .5 : 0));
                 playback.configure(editor.draft);

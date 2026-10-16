@@ -42,8 +42,9 @@ class ProjectionPreset {
   final Offset center;
   final List<Offset> corners;
   factory ProjectionPreset.initial() => ProjectionPreset(
+    // Keep the original ID stable for compatibility with saved preset libraries.
     id: 'postazione-01',
-    label: 'Postazione 01',
+    label: 'Installation 01',
     mediaPath: 'media/demo.mp4',
     outputSize: const Size(1920, 1080),
     displayKey: '',
@@ -90,15 +91,15 @@ class ProjectionPreset {
     if (!RegExp(r'^[a-zA-Z0-9_-]{1,80}$').hasMatch(id) ||
         label.trim().isEmpty ||
         label.length > 120) {
-      throw const FormatException('Nome preset non valido');
+      throw const FormatException('Invalid preset name');
     }
     if (!RegExp(r'^media/[a-zA-Z0-9_-]+\.[a-zA-Z0-9]{1,8}$')
         .hasMatch(mediaPath)) {
-      throw const FormatException('Percorso video non valido');
+      throw const FormatException('Invalid video path');
     }
     for (final v in [outputSize.width, outputSize.height]) {
       if (!v.isFinite || v < 32 || v > 8192 || v != v.roundToDouble()) {
-        throw const FormatException('Risoluzione non valida');
+        throw const FormatException('Invalid resolution');
       }
     }
     for (final (v, min, max) in [
@@ -110,7 +111,7 @@ class ProjectionPreset {
       (volume, 0.0, 1.0),
     ]) {
       if (!v.isFinite || v < min || v > max) {
-        throw const FormatException('Parametro fuori intervallo');
+        throw const FormatException('Parameter out of range');
       }
     }
     final error =
@@ -146,7 +147,7 @@ class ProjectionPreset {
   factory ProjectionPreset.fromJson(Map<String, dynamic> j) {
     try {
       if (j['schemaVersion'] != 1) {
-        throw const FormatException('Versione preset non supportata');
+        throw const FormatException('Unsupported preset version');
       }
       final media = j['media'] as Map,
           play = j['playback'] as Map,
@@ -155,7 +156,7 @@ class ProjectionPreset {
           a = map['affine'] as Map;
       double number(dynamic v) {
         if (v is! num || !v.isFinite) {
-          throw const FormatException('Numero non valido');
+          throw const FormatException('Invalid number');
         }
         return v.toDouble();
       }
@@ -188,7 +189,7 @@ class ProjectionPreset {
     } on FormatException {
       rethrow;
     } catch (_) {
-      throw const FormatException('Preset incompleto o non valido');
+      throw const FormatException('Incomplete or invalid preset');
     }
   }
 }

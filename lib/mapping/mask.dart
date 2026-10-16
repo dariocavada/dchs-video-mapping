@@ -63,7 +63,7 @@ Offset readPoint(dynamic raw) {
   if (raw is! List ||
       raw.length != 2 ||
       raw.any((v) => v is! num || !v.isFinite)) {
-    throw const FormatException('Coordinate non valide');
+    throw const FormatException('Invalid coordinates');
   }
   return Offset((raw[0] as num).toDouble(), (raw[1] as num).toDouble());
 }
@@ -182,7 +182,7 @@ class BezierMask {
         j['closed'] != true ||
         j['fillRule'] != 'nonZero' ||
         j['enabled'] is! bool) {
-      throw const FormatException('Maschera non supportata');
+      throw const FormatException('Unsupported mask');
     }
     return BezierMask(
       enabled: j['enabled'] as bool,
@@ -249,12 +249,12 @@ bool _intersects(Offset a, Offset b, Offset c, Offset d) {
 
 String? validateMask(BezierMask mask, Size size) {
   if (mask.nodes.length < 3 || mask.nodes.length > 32) {
-    return 'La sagoma richiede da 3 a 32 nodi.';
+    return 'The mask requires 3 to 32 nodes.';
   }
   final ids = <String>{};
   for (final n in mask.nodes) {
     if (n.id.isEmpty || !ids.add(n.id)) {
-      return 'Identificativi dei nodi non validi.';
+      return 'Invalid node IDs.';
     }
     for (final (p, min, max) in [
       (n.position, 0.0, 1.0),
@@ -267,25 +267,25 @@ String? validateMask(BezierMask mask, Size size) {
           p.dx > max ||
           p.dy < min ||
           p.dy > max) {
-        return 'Coordinate fuori dai limiti della sagoma.';
+        return 'Coordinates outside mask limits.';
       }
     }
   }
   final points = flattenMask(mask, size);
-  if (points.length > 8192) return 'Sagoma troppo complessa.';
+  if (points.length > 8192) return 'The mask is too complex.';
   var area = 0.0;
   final count = points.length - 1;
   for (var i = 0; i < count; i++) {
     final a = points[i], b = points[i + 1];
-    if ((b - a).distance < 1e-7) return 'Due nodi o segmenti coincidono.';
+    if ((b - a).distance < 1e-7) return 'Two nodes or segments overlap.';
     area += a.dx * b.dy - b.dx * a.dy;
     for (var j = i + 2; j < count; j++) {
       if (i == 0 && j == count - 1) continue;
       if (_intersects(a, b, points[j], points[j + 1])) {
-        return 'La sagoma si incrocia: correggere nodi o maniglie.';
+        return 'The mask self-intersects: adjust nodes or handles.';
       }
     }
   }
-  if (area.abs() / 2 < 16) return 'La sagoma ha area insufficiente.';
+  if (area.abs() / 2 < 16) return 'The mask area is too small.';
   return null;
 }

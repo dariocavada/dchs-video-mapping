@@ -71,7 +71,7 @@ void main() {
         mediaPath: 'media/new.mp4',
         volume: .7,
         loop: false,
-        label: 'Nuovo',
+        label: 'New',
       ),
     );
     e.undo();
@@ -79,7 +79,7 @@ void main() {
     expect(e.draft.mediaPath, 'media/new.mp4');
     expect(e.draft.volume, .7);
     expect(e.draft.loop, false);
-    expect(e.draft.label, 'Nuovo');
+    expect(e.draft.label, 'New');
     e.redo();
     expect(e.draft.rotation, 30);
     expect(e.draft.mediaPath, 'media/new.mp4');

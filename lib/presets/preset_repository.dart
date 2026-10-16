@@ -17,7 +17,7 @@ class PresetRepository {
       if (!await f.exists()) return null;
       final j = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
       if (j['schemaVersion'] != 1) {
-        throw const FormatException('Versione archivio non supportata');
+        throw const FormatException('Unsupported archive version');
       }
       final list = (j['presets'] as List)
           .map(
@@ -28,11 +28,11 @@ class PresetRepository {
       if (list.isEmpty ||
           list.map((p) => p.id).toSet().length != list.length ||
           !list.any((p) => p.id == j['activeId'])) {
-        throw const FormatException('Archivio preset non valido');
+        throw const FormatException('Invalid preset archive');
       }
       return j;
     } catch (e) {
-      warning = 'Archivio $name non leggibile: $e';
+      warning = 'Cannot read archive $name: $e';
       return null;
     }
   }
@@ -74,7 +74,7 @@ class PresetRepository {
     p.validate();
     final media = File('${root.path}/${p.mediaPath}');
     if (!await media.exists() || await media.length() == 0) {
-      throw const FileSystemException('Il video del preset non è disponibile.');
+      throw const FileSystemException('The preset video is unavailable.');
     }
     await root.create(recursive: true);
     final old = await _current(), presets = _presets(old);
@@ -106,7 +106,7 @@ class PresetRepository {
   Future<ProjectionPreset> previous() async {
     final j = await _read('presets.backup.json');
     if (j == null) {
-      throw const FormatException('Nessuna copia precedente valida.');
+      throw const FormatException('No valid previous copy.');
     }
     return _presets(j).firstWhere((p) => p.id == j['activeId']);
   }

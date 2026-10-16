@@ -49,7 +49,7 @@ class PlayerSession {
     if (preset == null &&
         (await File('${root.path}/presets.json').exists() ||
             await File('${root.path}/presets.backup.json').exists())) {
-      warning = 'Nessun preset valido: ripristinare la configurazione dal personale tecnico.';
+      warning = 'No valid preset: contact technical staff to restore the configuration.';
     }
     if (preset == null && warning == null) {
       final demo = File('${root.path}/media/demo.mp4');
@@ -112,7 +112,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       _busy = false,
       _dialog = false,
       _metricsPending = true;
-  String _status = 'MP4 dimostrativo · calibrazione da verificare in sala';
+  String _status = 'Demo MP4 · verify calibration at the installation site';
   String? _outputWarning;
   Size? _actualSize;
   String _actualKey = '';
@@ -136,7 +136,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
           _outputWarning =
               p.outputSize != _actualSize ||
                   (p.displayKey.isNotEmpty && p.displayKey != _actualKey)
-              ? 'Output cambiato: ${_actualSize!.width.toInt()} × ${_actualSize!.height.toInt()}. La calibrazione richiede una verifica.'
+              ? 'Output changed: ${_actualSize!.width.toInt()} × ${_actualSize!.height.toInt()}. Calibration needs to be checked.'
               : null;
         }
       });
@@ -189,7 +189,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       _outputWarning =
           p.outputSize != size ||
               (p.displayKey.isNotEmpty && p.displayKey != key)
-          ? 'Output cambiato: ${size.width.toInt()} × ${size.height.toInt()}. La calibrazione richiede una verifica.'
+          ? 'Output changed: ${size.width.toInt()} × ${size.height.toInt()}. Calibration needs to be checked.'
           : null;
     });
     await s.log.write(
@@ -208,7 +208,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c),
-            child: const Text('Chiudi'),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -233,12 +233,12 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Indietro'),
+              child: const Text('Back'),
             ),
             TextButton(
               key: const ValueKey('confirm-action'),
               onPressed: () => Navigator.pop(c, true),
-              child: const Text('Conferma'),
+              child: const Text('Confirm'),
             ),
           ],
         ),
@@ -249,29 +249,27 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
     _dialog = true;
     try {
       final pin = await _text(
-        s.access.isSet
-            ? 'Accesso del personale'
-            : 'Imposta il PIN della postazione',
+        s.access.isSet ? 'Staff access' : 'Set the installation PIN',
         pin: true,
       );
       if (pin == null) return;
       if (!s.access.isSet) {
-        final second = await _text('Ripeti il nuovo PIN', pin: true);
+        final second = await _text('Repeat the new PIN', pin: true);
         if (second != pin) {
-          await _message('PIN non confermato', 'I due PIN devono coincidere.');
+          await _message('PIN not confirmed', 'The two PINs must match.');
           return;
         }
         await s.access.setPin(pin);
       } else if (!await s.access.verify(pin)) {
         await _message(
-          'Accesso non riuscito',
-          'PIN non valido. Dopo cinque tentativi attendere 30 secondi.',
+          'Access failed',
+          'Invalid PIN. After five attempts, wait 30 seconds.',
         );
         return;
       }
       if (mounted) setState(() => _operator = true);
     } catch (e) {
-      await _message('Accesso non riuscito', _friendly(e));
+      await _message('Access failed', _friendly(e));
     } finally {
       _dialog = false;
     }
@@ -280,7 +278,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
   String _friendly(Object e) => e is FormatException
       ? e.message.toString()
       : e is FileSystemException
-      ? 'Operazione sui file non riuscita. Controllare spazio disponibile e contenuto.'
+      ? 'File operation failed. Check available space and file contents.'
       : e.toString();
   Future<void> _work(Future<void> Function() action) async {
     if (_busy) return;
@@ -289,7 +287,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       await action();
     } catch (e) {
       await s.log.write('operator_error', e);
-      await _message('Operazione non completata', _friendly(e));
+      await _message('Operation failed', _friendly(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -303,7 +301,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       }
       if (_outputWarning != null || _metricsPending) {
         throw const FormatException(
-          'Confermare prima la calibrazione del nuovo output.',
+          'Confirm calibration of the new output first.',
         );
       }
       final p = s.editor.draft.copyWith(displayKey: _actualKey);
@@ -311,7 +309,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       s.editor.change(p);
       s.editor.markSaved();
       await s.playback.configure(p);
-      setState(() => _status = 'Preset salvato · ${p.label}');
+      setState(() => _status = 'Preset saved · ${p.label}');
       await s.log.write('preset_saved', p.id);
     });
   }
@@ -320,15 +318,15 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
     if (!_operator || _busy) return;
     if (!s.editor.canSave) {
       await _message(
-        'Sagoma da correggere',
+        'Mask needs correction',
         s.editor.maskError ?? s.editor.geometryError!,
       );
       return;
     }
     if (_outputWarning != null) {
       await _message(
-        'Output da ricalibrare',
-        'Verificare la griglia, poi confermare “Ricalibra output”.',
+        'Output needs recalibration',
+        'Check the grid, then confirm “Recalibrate output”.',
       );
       return;
     }
@@ -336,22 +334,22 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       final choice = await showDialog<String>(
         context: context,
         builder: (c) => AlertDialog(
-          title: const Text('Modifiche non salvate'),
-          content: const Text('Al riavvio viene usato il preset salvato.'),
+          title: const Text('Unsaved changes'),
+          content: const Text('The saved preset will be used on restart.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(c),
-              child: const Text('Indietro'),
+              child: const Text('Back'),
             ),
             TextButton(
               key: const ValueKey('project-draft'),
               onPressed: () => Navigator.pop(c, 'draft'),
-              child: const Text('Proietta la bozza'),
+              child: const Text('Project draft'),
             ),
             TextButton(
               key: const ValueKey('save-and-project'),
               onPressed: () => Navigator.pop(c, 'save'),
-              child: const Text('Salva e proietta'),
+              child: const Text('Save and project'),
             ),
           ],
         ),
@@ -370,8 +368,8 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
   Future<void> _acceptOutput() async {
     if (!_operator || _actualSize == null) return;
     if (!await _confirm(
-      'Usare questo output?',
-      'La geometria normalizzata verrà riferita al nuovo raster. Verificare griglia e sagoma sulla superficie prima di salvare.',
+      'Use this output?',
+      'The normalized geometry will be mapped to the new raster. Check the grid and mask on the surface before saving.',
     )) {
       return;
     }
@@ -412,12 +410,12 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       final next = s.editor.draft.copyWith(mediaPath: relative);
       if (!await s.playback.open(File('${s.root.path}/$relative'), next)) {
         throw const FormatException(
-          'Il nuovo video non è stato applicato. Il precedente resta attivo.',
+          'The new video was not applied. The previous video remains active.',
         );
       }
       s.editor.change(next);
       setState(
-        () => _status = 'Video importato: ${file.name} · salvare il preset.',
+        () => _status = 'Video imported: ${file.name} · save the preset.',
       );
     });
   }
@@ -425,15 +423,15 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
   Future<bool> _discardDraft() async =>
       !s.editor.dirty ||
       await _confirm(
-        'Abbandonare la bozza?',
-        'La calibrazione salvata rimane disponibile. Le modifiche non salvate verranno abbandonate.',
+        'Discard draft?',
+        'The saved calibration remains available. Unsaved changes will be discarded.',
       );
   Future<void> _preset(String action) async {
     if (!_operator) return;
     if (action == 'duplicate') {
       final name = await _text(
-        'Nome della copia',
-        initial: '${s.editor.draft.label} · copia',
+        'Copy name',
+        initial: '${s.editor.draft.label} · copy',
       );
       if (name == null || name.trim().isEmpty) return;
       await _work(() async {
@@ -443,14 +441,14 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
         );
         await s.repository.save(p);
         s.editor.replace(p);
-        setState(() => _status = 'Copia salvata');
+        setState(() => _status = 'Copy saved');
       });
       return;
     }
     if (action == 'reset') {
       if (!await _confirm(
-        'Azzera la calibrazione?',
-        'Il video e gli altri preset vengono conservati. Puoi annullare questa modifica.',
+        'Reset calibration?',
+        'The video and other presets will be kept. You can undo this change.',
       )) {
         return;
       }
@@ -475,7 +473,7 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
         p = await s.repository.previous();
       } else {
         final all = await s.repository.list();
-        if (all.isEmpty) throw const FormatException('Nessun preset salvato.');
+        if (all.isEmpty) throw const FormatException('No saved presets.');
         if (!mounted) return;
         p = await showDialog<ProjectionPreset>(
           context: context,
@@ -485,17 +483,16 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       if (p == null) return;
       if (!await s.playback.open(File('${s.root.path}/${p.mediaPath}'), p)) {
         throw const FormatException(
-          'Video del preset non disponibile. Il precedente resta attivo.',
+          'Preset video unavailable. The previous video remains active.',
         );
       }
       // Loading previews the selected preset. Only explicit save changes startup.
       s.editor.replace(p, saved: false);
       if (action == 'previous') {
-        s.editor.change(p.copyWith(label: '${p.label} · ripristinato'));
+        s.editor.change(p.copyWith(label: '${p.label} · restored'));
       }
       setState(
-        () => _status =
-            '${p!.label} caricato · premi Salva per usarlo all’avvio.',
+        () => _status = '${p!.label} loaded · press Save to use it on startup.',
       );
       await _measureOutput();
     });
@@ -520,17 +517,17 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
       return;
     }
     if (action == 'pin') {
-      final old = await _text('PIN attuale', pin: true);
+      final old = await _text('Current PIN', pin: true);
       if (old == null) return;
       if (!await s.access.verify(old)) {
-        await _message('PIN non valido', 'Il PIN non è stato modificato.');
+        await _message('Invalid PIN', 'The PIN was not changed.');
         return;
       }
-      final pin = await _text('Nuovo PIN', pin: true);
+      final pin = await _text('New PIN', pin: true);
       if (pin == null) return;
-      final second = await _text('Ripeti il nuovo PIN', pin: true);
+      final second = await _text('Repeat the new PIN', pin: true);
       if (pin != second) {
-        await _message('PIN non confermato', 'Il PIN non è stato modificato.');
+        await _message('PIN not confirmed', 'The PIN was not changed.');
         return;
       }
       await _work(() async {
@@ -541,18 +538,18 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
     if (action == 'kiosk') {
       final locked = await PlatformOutput.kiosk('status');
       await _message(
-        'Stato kiosk',
+        'Kiosk status',
         locked
-            ? 'Lock task attivo. L’uscita richiede la procedura autorizzata del DPC.'
-            : 'Lock task non attivo. Il dispositivo deve essere gestito da un DPC che autorizza dev.dariocavada.dchs_video_mapping.',
+            ? 'Lock task is active. Exiting requires the authorized DPC procedure.'
+            : 'Lock task is inactive. The device must be managed by a DPC that allows dev.dariocavada.dchs_video_mapping.',
       );
       return;
     }
     if (action == 'diagnostics') {
       final p = s.editor.draft, v = s.playback.snapshot;
       await _message(
-        'Diagnostica',
-        'App 1.0.0+1 · ${s.playback.phase.name}\nPreset: ${p.label}\nVideo: ${v.width.toInt()} × ${v.height.toInt()}, durata ${v.duration}\nPosizione: ${v.position}\nOutput: $_actualKey\n${_actualSize?.width.toInt()} × ${_actualSize?.height.toInt()}\nTentativi recupero: ${s.playback.watchdog.attempts} / 3\n${s.playback.diagnostic ?? s.startupWarning ?? s.repository.warning ?? 'Nessun errore registrato.'}',
+        'Diagnostics',
+        'App 1.0.0+1 · ${s.playback.phase.name}\nPreset: ${p.label}\nVideo: ${v.width.toInt()} × ${v.height.toInt()}, duration ${v.duration}\nPosition: ${v.position}\nOutput: $_actualKey\n${_actualSize?.width.toInt()} × ${_actualSize?.height.toInt()}\nRecovery attempts: ${s.playback.watchdog.attempts} / 3\n${s.playback.diagnostic ?? s.startupWarning ?? s.repository.warning ?? 'No errors recorded.'}',
       );
       return;
     }
@@ -564,13 +561,13 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
             );
         await s.log.write(
           'export',
-          'configurazione e log; media e PIN esclusi',
+          'configuration and logs; media and PIN excluded',
         );
         await SupportArchive.write(s.root, file, s.editor.draft);
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(file.path, mimeType: 'application/zip')],
-            subject: 'DCHS Video Mapping · configurazione e log',
+            subject: 'DCHS Video Mapping · configuration and logs',
           ),
         );
       });
@@ -676,17 +673,17 @@ class _PlayerHostState extends State<_PlayerHost> with WidgetsBindingObserver {
                               ),
                               const SizedBox(height: 22),
                               const Text(
-                                'Prepara la postazione',
+                                'Prepare the installation',
                                 style: TextStyle(fontSize: 32),
                               ),
                               const SizedBox(height: 20),
                               const Text(
-                                'Imposta un PIN del personale, importa il video e calibra la superficie. Il filmato incluso è dimostrativo.',
+                                'Set a staff PIN, import a video and calibrate the surface. The included video is a demo.',
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 28),
                               PlayerButton(
-                                'Configura il player',
+                                'Set up player',
                                 key: const ValueKey('setup-player'),
                                 onPressed: () => unawaited(_access()),
                               ),
@@ -723,7 +720,7 @@ class _PresetPickerState extends State<_PresetPicker> {
   int page = 0;
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Carica una calibrazione'),
+    title: const Text('Load a calibration'),
     content: SizedBox(
       width: 620,
       child: Column(
@@ -745,14 +742,14 @@ class _PresetPickerState extends State<_PresetPicker> {
             children: [
               TextButton(
                 onPressed: page > 0 ? () => setState(() => page--) : null,
-                child: const Text('Precedenti'),
+                child: const Text('Previous'),
               ),
               Text('${page + 1} / ${(widget.presets.length / 6).ceil()}'),
               TextButton(
                 onPressed: (page + 1) * 6 < widget.presets.length
                     ? () => setState(() => page++)
                     : null,
-                child: const Text('Successivi'),
+                child: const Text('Next'),
               ),
             ],
           ),
@@ -762,7 +759,7 @@ class _PresetPickerState extends State<_PresetPicker> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Annulla'),
+        child: const Text('Cancel'),
       ),
     ],
   );

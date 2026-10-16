@@ -9,7 +9,7 @@ class MediaImporter {
     required Future<void> Function(File) validate,
   }) async {
     if (!RegExp(r'^[a-zA-Z0-9]{1,8}$').hasMatch(extension)) {
-      throw const FormatException('Estensione non valida');
+      throw const FormatException('Invalid extension');
     }
     await Directory('${root.path}/media').create(recursive: true);
     final name = 'video-${DateTime.now().microsecondsSinceEpoch}';
@@ -24,7 +24,7 @@ class MediaImporter {
         await sink.close();
       }
       if (await temp.length() == 0) {
-        throw const FormatException('Il video è vuoto.');
+        throw const FormatException('The video is empty.');
       }
       await validate(temp);
       await temp.rename('${root.path}/$path');

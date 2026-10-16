@@ -19,7 +19,7 @@ class OperatorAccess {
           base64Decode(j['salt'] as String).length != 16 ||
           base64Decode(j['hash'] as String).length != 32) {
         throw const FormatException(
-          'Credenziali non valide; ripristinare dal personale tecnico.',
+          'Invalid credentials; contact technical staff to restore access.',
         );
       }
       a._salt = j['salt'] as String;
@@ -40,7 +40,7 @@ class OperatorAccess {
           .extractBytes();
   Future<void> setPin(String pin) async {
     if (!RegExp(r'^\d{6,12}$').hasMatch(pin)) {
-      throw const FormatException('Usare da 6 a 12 cifre.');
+      throw const FormatException('Use 6 to 12 digits.');
     }
     final random = Random.secure(),
         salt = base64Encode(List.generate(16, (_) => random.nextInt(256))),

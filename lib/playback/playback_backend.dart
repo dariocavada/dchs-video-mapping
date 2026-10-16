@@ -52,7 +52,7 @@ class AndroidVideoBackend extends PlaybackBackend {
         !c.value.isInitialized ||
         c.value.duration <= Duration.zero ||
         c.value.size.isEmpty) {
-      throw const FormatException('Il decoder non può aprire questo video.');
+      throw const FormatException('The decoder cannot open this video.');
     }
     _surface = VideoPlayer(c);
   }

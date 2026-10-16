@@ -22,12 +22,12 @@ void main() {
     () async {
       final r = PresetRepository(root), p = ProjectionPreset.initial();
       await r.save(p);
-      await r.save(p.copyWith(label: 'Secondo'));
+      await r.save(p.copyWith(label: 'Second'));
       await File('${root.path}/presets.json').writeAsString('{broken');
-      expect((await r.loadActive())!.label, 'Postazione 01');
-      await r.save(p.copyWith(label: 'Terzo'));
+      expect((await r.loadActive())!.label, 'Installation 01');
+      await r.save(p.copyWith(label: 'Third'));
       await File('${root.path}/presets.json').writeAsString('{broken again');
-      expect((await r.loadActive())!.label, 'Postazione 01');
+      expect((await r.loadActive())!.label, 'Installation 01');
     },
   );
   test(
@@ -42,12 +42,12 @@ void main() {
         },
       );
       await expectLater(
-        failing.save(p.copyWith(label: 'Mai salvato')),
+        failing.save(p.copyWith(label: 'Never saved')),
         throwsA(isA<FileSystemException>()),
       );
       expect(
         (await PresetRepository(root).loadActive())!.label,
-        'Postazione 01',
+        'Installation 01',
       );
       await expectLater(
         PresetRepository(root).save(p.copyWith(mediaPath: 'media/missing.mp4')),
@@ -59,7 +59,7 @@ void main() {
     final r = PresetRepository(root);
     await r.save(ProjectionPreset.initial());
     await r.save(
-      ProjectionPreset.initial().copyWith(id: 'secondo', label: 'Secondo'),
+      ProjectionPreset.initial().copyWith(id: 'second', label: 'Second'),
     );
     expect((await r.list()).length, 2);
     await r.activate('postazione-01');

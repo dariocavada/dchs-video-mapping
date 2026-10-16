@@ -46,14 +46,14 @@ class _StartupFailure extends StatelessWidget {
         onLongPress: () => showDialog<void>(
           context: context,
           builder: (c) => AlertDialog(
-            title: const Text('Avvio non riuscito'),
+            title: const Text('Startup failed'),
             content: const Text(
-              'La configurazione locale non può essere aperta. Contattare il personale tecnico per ripristinarla.',
+              'The local configuration could not be opened. Contact technical staff to restore it.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(c),
-                child: const Text('Chiudi'),
+                child: const Text('Close'),
               ),
             ],
           ),

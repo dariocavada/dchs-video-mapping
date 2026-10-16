@@ -140,7 +140,7 @@ class CalibrationPattern extends CustomPainter {
     label('3', Offset(size.width - 70, size.height - 90));
     label('4', Offset(24, size.height - 90));
     label(
-      'DCHS · CALIBRAZIONE',
+      'DCHS · CALIBRATION',
       Offset(size.width * .34, size.height * .46),
       font: 38,
     );

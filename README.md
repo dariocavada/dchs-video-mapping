@@ -1,49 +1,49 @@
 # DCHS Video Mapping
 
-Player semplice per proiezioni e installazioni: un video locale, riproduzione in loop, calibrazione affine o a quattro angoli, sagoma di ritaglio Bézier. Android ≥ 24; riferimento Full HD 1920 × 1080. Funziona offline su un unico output: durante la manutenzione anche il proiettore mostra i controlli.
+A simple player for projections and installations: one local video, loop playback, affine or four-corner calibration, and a Bézier clipping mask. Android ≥ 24; Full HD 1920 × 1080 reference output. Runs offline on a single output: the projector also shows the controls during maintenance.
 
-![Editor Android Full HD](docs/screenshots/01-player-geometria-android.png)
+![Full HD Android editor](docs/screenshots/01-player-geometry-android.png)
 
-## Funzioni
+## Features
 
-- Video locale, loop, autoplay, play/pausa, timeline, volume e mute.
-- Calibrazione affine o a quattro angoli, con griglia di riferimento.
-- Una sagoma chiusa Bézier con nodi e maniglie, undo/redo e zoom/pan dell’editor.
-- Preset locali, accesso operatore tramite PIN, diagnostica ed esportazione di configurazione/log.
-- Proiezione a schermo intero, recupero dopo errori di configurazione e watchdog del player.
+- Local video, loop, autoplay, play/pause, timeline, volume and mute.
+- Affine or four-corner calibration with a reference grid.
+- One closed Bézier mask with nodes and handles, undo/redo, and editor zoom/pan.
+- Local presets, operator access via PIN, diagnostics, and configuration/log export.
+- Full-screen projection, recovery from configuration errors, and a playback watchdog.
 
-## Avvio e APK
+## Getting started and building an APK
 
-Toolchain verificata: Flutter 3.47.5 / Dart 3.13.4, Java 21 per Gradle, target Java/Kotlin 17, Android SDK 36, AGP 9.1.0 / Gradle 9.3.1. Kotlin integrato attivo; `android.newDsl=false` e pin del compilatore mantenuti per i requisiti della toolchain Flutter corrente.
+Verified toolchain: Flutter 3.47.5 / Dart 3.13.4, Java 21 for Gradle, Java/Kotlin target 17, Android SDK 36, AGP 9.1.0 / Gradle 9.3.1. Built-in Kotlin is enabled; `android.newDsl=false` and the compiler version pin are retained to meet the current Flutter toolchain requirements.
 
 ```sh
 git clone https://github.com/dariocavada/dchs-video-mapping.git
 cd dchs-video-mapping
 flutter pub get
-flutter run -d <id-dispositivo-android>
+flutter run -d <android-device-id>
 flutter build apk --debug --target lib/main.dart
 ```
 
-APK locale: `build/app/outputs/flutter-apk/app-debug.apk`. ID applicazione: **`dev.dariocavada.dchs_video_mapping`**.
+Local APK: `build/app/outputs/flutter-apk/app-debug.apk`. Application ID: **`dev.dariocavada.dchs_video_mapping`**.
 
-Il comando genera un APK debug. Per distribuire l’app configurare la firma e il dispositivo di destinazione; la configurazione `release` usa ancora la chiave debug: non distribuirla come versione firmata di produzione. Configurare una propria chiave prima di una distribuzione; mantenere keystore e `key.properties` fuori dal repository.
+This command produces a debug APK. Configure signing and the target device before distributing the app. The `release` configuration still uses the debug key: do not distribute it as a production-signed release. Set up your own signing key before distribution; keep the keystore and `key.properties` out of the repository.
 
-## Interfaccia e piattaforme
+## Interface and platforms
 
-Il tema è Material 3 chiaro, con il colore `Colors.deepPurple` del template Flutter e caratteri di sistema. Il pannello di calibrazione mantiene un layout orizzontale 16:9, adattato alla dimensione disponibile. L’output di proiezione rimane nero dove non c’è video. L’interfaccia è in italiano.
+The interface uses a light Material 3 theme with `Colors.deepPurple` from the Flutter template and system fonts. The calibration panel keeps a horizontal 16:9 layout, scaled to the available space. The projection output stays black wherever there is no video. The interface is in English.
 
-È implementato solo Android: il bridge nativo per display, schermo acceso e kiosk non è disponibile su iOS, desktop o web. L’ID applicazione è `dev.dariocavada.dchs_video_mapping`. Non sono richiesti account, server o servizi cloud.
+Only Android is implemented: the native bridge for display information, keeping the screen awake, and kiosk mode is unavailable on iOS, desktop or web. The application ID is `dev.dariocavada.dchs_video_mapping`. No accounts, servers or cloud services are required.
 
-## Prima configurazione
+## First setup
 
-1. Aprire il player e scegliere **Configura il player**. Creare e ripetere un PIN da 6 a 12 cifre: non esiste un valore predefinito. Il PIN è salvato con sale casuale e PBKDF2-HMAC-SHA256, 120.000 iterazioni; cinque errori consecutivi impongono 30 secondi di attesa.
-2. Nella scheda **Video**, scegliere un file locale dal selettore Android. Il file viene copiato in streaming nello storage privato e aperto da un decoder candidato prima di sostituire il contenuto attivo. Annullamento, errore di copia o codec non leggibile conservano il precedente video e gli altri preset. Un ulteriore errore nell'applicazione conserva il decoder precedente.
-3. Usare **Geometria** per centro X/Y in pixel di output, scale in percentuale e rotazione oraria. «Mantieni proporzioni» collega le scale. Trascinare l'anteprima per spostare il video. «Quattro angoli» usa un'omografia alternativa all'affine: angoli 1–4 in senso orario, partendo da alto sinistra. Un quadrilatero non valido lascia nell'anteprima l'ultima geometria valida e impedisce il salvataggio.
-4. Usare **Bézier** per la sagoma: attivare il ritaglio, partire da un rettangolo o da un arco e trascinare nodi/maniglie. La maschera rimane ferma nello spazio di output quando si muove il video. Non deforma l'immagine interna.
-5. Attivare **Griglia** per calibrare: bordo, centro e numeri attraversano le stesse trasformazioni, fit, specchio e ritaglio del video. Disattivarla e verificare il filmato prima della consegna.
-6. Assegnare un nome nella scheda **Preset**, quindi **Salva preset**. **Solo proiezione** nasconde tutti gli aiuti e il cursore. Per una bozza non salvata si sceglie fra salvataggio, proiezione temporanea e ritorno all'editor. Dopo un riavvio viene usato il preset valido salvato, dall'inizio del video.
+1. Open the player and choose **Set up player**. Create and repeat a PIN of 6 to 12 digits: there is no default PIN. The PIN is stored using a random salt and PBKDF2-HMAC-SHA256 with 120,000 iterations; five consecutive failures trigger a 30-second wait.
+2. In the **Video** tab, choose a local file using the Android file picker. The file is streamed into private storage and opened by a candidate decoder before replacing the active content. Cancellation, a copy failure or an unreadable codec preserves the previous video and other presets. A subsequent failure to apply the video also preserves the previous decoder.
+3. Use **Geometry** to set the X/Y center in output pixels, scales as percentages, and clockwise rotation. **Keep aspect ratio** links the scales. Drag the preview to move the video. **Four corners** uses a homography as an alternative to the affine transform: corners 1–4 run clockwise from the top left. An invalid quadrilateral keeps the last valid geometry in the preview and blocks saving.
+4. Use **Bézier** for the mask: enable clipping, start from a rectangle or arch, and drag nodes/handles. The mask stays fixed in output space when the video moves. It does not warp the image inside it.
+5. Enable **Grid** to calibrate: the border, center and numbers follow the same transforms, fit, mirroring and clipping as the video. Disable it and check the footage before handover.
+6. Enter a name in the **Preset** tab, then choose **Save preset**. **Projection only** hides all guides and the cursor. For an unsaved draft, choose between saving, temporary projection, and returning to the editor. After a restart, the valid saved preset is used and the video starts from the beginning.
 
-Il MP4 incluso è un segnale di prova animato originale generato con FFmpeg (`testsrc2`, H.264, 1920 × 1080, 25 fps, 4 secondi, senza audio): è un materiale dimostrativo, da sostituire con il proprio video. Si può rigenerare con:
+The included MP4 is an original animated test signal generated with FFmpeg (`testsrc2`, H.264, 1920 × 1080, 25 fps, 4 seconds, no audio). It is demo material; replace it with your own video. To regenerate it:
 
 ```sh
 ffmpeg -f lavfi -i 'testsrc2=size=1920x1080:rate=25:duration=4' \
@@ -51,99 +51,99 @@ ffmpeg -f lavfi -i 'testsrc2=size=1920x1080:rate=25:duration=4' \
   -movflags +faststart assets/demo.mp4
 ```
 
-## Editor della sagoma
+## Mask editor
 
-Un solo contorno chiuso, da 3 a 32 nodi, con segmenti cubici. Cerchi per i nodi e quadrati per le maniglie; i pulsanti **Entrante / Nodo / Uscente** permettono di scegliere componenti sovrapposti. La selezione sul canvas usa una zona di presa allargata rispetto ai marker. Un nodo trascinato porta con sé entrambe le maniglie; «Nodo morbido» mantiene le maniglie collineari, con lunghezze indipendenti.
+A single closed contour with 3 to 32 nodes and cubic segments. Circles represent nodes; squares represent handles. The **Incoming / Node / Outgoing** buttons let you select overlapping components. Canvas selection uses a larger hit area than the visible markers. Dragging a node moves both handles with it; **Smooth node** keeps the handles collinear, with independent lengths.
 
-**Aggiungi nodo** richiede un tocco sulla curva: suddivide il segmento con de Casteljau, senza modificarne inizialmente la forma. **Elimina nodo** non scende sotto tre nodi. Coordinate numeriche, pulsanti direzionali e frecce regolano il componente selezionato. Passo da 1 pixel di output o 10 pixel; con tastiera, Maiusc + freccia usa 10 pixel anche se l'anteprima è ridotta.
+**Add node** requires a tap on the curve: it splits the segment using de Casteljau without initially changing its shape. **Delete node** keeps at least three nodes. Numeric coordinates, directional buttons and arrow keys adjust the selected component. The step is 1 or 10 output pixels; on a keyboard, Shift + arrow moves by 10 pixels even when the preview is scaled down.
 
-**Annulla / Ripeti** riguardano calibrazione, sagoma, fit, specchio e riferimenti dell'output. Un trascinamento intero è una sola operazione. Import del video, audio, loop, autoplay e nome non vengono cambiati dall'undo geometrico, così contenuto e preset rimangono coerenti. Ctrl + Z / Ctrl + Maiusc + Z; Ctrl + S salva. I campi numerici accettano anche la virgola decimale e applicano il valore con Invio o perdita di focus.
+**Undo / Redo** cover calibration, mask, fit, mirroring and output references. A whole drag counts as one operation. Geometric undo does not change video imports, audio, loop, autoplay or the preset name, keeping content and presets consistent. Ctrl + Z / Ctrl + Shift + Z undo/redo; Ctrl + S saves. Numeric fields also accept a decimal comma and apply the value on Enter or loss of focus.
 
-La validazione rifiuta coordinate non finite, nodi fuori `[0,1]`, maniglie fuori `[-1,2]`, ID ripetuti, area insufficiente e auto-intersezioni. Le curve vengono approssimate adattivamente nel raster di output con tolleranza 0,5 px per il controllo dei segmenti; il rendering conserva le curve cubiche originali e un bordo antialias. Durante una bozza invalida resta applicata l'ultima sagoma valida, con errore consultabile nell'editor. Non si può salvare o passare in proiezione una bozza invalida.
+Validation rejects non-finite coordinates, nodes outside `[0,1]`, handles outside `[-1,2]`, duplicate IDs, insufficient area and self-intersections. Curves are adaptively approximated in the output raster with a 0.5 px tolerance for segment checks; rendering retains the original cubic curves and an antialiased edge. While a draft is invalid, the last valid mask remains applied, with an error shown in the editor. An invalid draft cannot be saved or projected.
 
-### Maniglie fuori dal bordo e vista dell’editor
+### Handles outside the frame and the editor view
 
-Se la curva in alto richiede una maniglia sopra l’immagine, selezionare **Entrante** o **Uscente** e usare **Inquadra tutte le maniglie** (icona dei quattro angoli aperti, sopra l’anteprima). La vista lascia un margine intorno all’output, comprendendo anche i punti di controllo esterni. Con i pulsanti zoom si può lavorare dal 20% al 400%; la rotella del mouse ingrandisce intorno al cursore. Il pulsante con la **mano** permette di trascinare soltanto l’area di lavoro; disattivarlo per tornare a modificare la curva. **Inquadra output** riporta la vista al 100% e la ricentra.
+If the curve at the top requires a handle above the image, select **Incoming** or **Outgoing** and use **Fit all handles** (the four open corners icon above the preview). The view leaves a margin around the output, including control points outside the frame. The zoom buttons cover 20% to 400%; the mouse wheel zooms around the cursor. The **hand** button lets you pan the workspace only; turn it off to resume curve editing. **Fit output** resets the view to 100% and centers it.
 
-La cornice individua il raster del proiettore; lo spazio esterno serve a prendere le maniglie. Il pan e lo zoom della vista sono temporanei, esclusi dal preset e dalla cronologia geometrica: non spostano né ridimensionano il video proiettato. Nudge e coordinate numeriche rimangono espressi in pixel di output. In alternativa si può inserire **Punto Y** negativo per una maniglia sopra il bordo: per esempio `-100` significa 100 pixel sopra l’output. I nodi restano dentro il raster; le maniglie conservano l’intervallo di lavoro `[-1,2]` normalizzato.
+The frame marks the projector raster; the space outside it lets you reach the handles. View pan and zoom are temporary and excluded from presets and geometric history: they do not move or resize the projected video. Nudges and numeric coordinates remain in output pixels. Alternatively, enter a negative **Point Y** for a handle above the frame: for example, `-100` means 100 pixels above the output. Nodes stay inside the raster; handles retain the normalized working range `[-1,2]`.
 
-Il riferimento di interazione è il flusso di MadMapper: zoom e adattamento della vista sono descritti nella [guida dell’interfaccia](https://madmapper.com/files/01-Introduction%20to%20the%20User%20Interface.pdf); lo spostamento del viewport durante la costruzione delle maschere è documentato nella [guida delle maschere](https://madmapper.com/files/04-Masking.pdf). Si tratta delle guide ufficiali scaricabili, non di una verifica dal vivo del software MadMapper.
+The interaction reference is the MadMapper workflow: zooming and fitting the view are described in the [user interface guide](https://madmapper.com/files/01-Introduction%20to%20the%20User%20Interface.pdf); moving the viewport while building masks is documented in the [masking guide](https://madmapper.com/files/04-Masking.pdf). These are the official downloadable guides; the MadMapper software itself was not tested live.
 
-## Preset, recupero e manutenzione
+## Presets, recovery and maintenance
 
-- **Carica preset**: anteprima della calibrazione selezionata; salvarla per renderla quella usata all'avvio. La scelta avvisa se abbandona una bozza modificata. La lista è paginata.
-- **Duplica**: crea un ID indipendente e salva con un nuovo nome, senza cancellare gli altri preset.
-- **Ripristina copia precedente**: richiama il preset attivo nella precedente revisione valida dell'archivio; verificare e salvare per applicarlo all'avvio.
-- **Azzera geometria e sagoma**: chiede conferma, conserva il video e gli altri preset; operazione annullabile.
-- **Sistema**: diagnostica, export di configurazione/log, cambio PIN con verifica del precedente, licenze e stato kiosk.
+- **Load preset** previews the selected calibration; save it to make it the startup preset. Loading warns before discarding a modified draft. The list is paginated.
+- **Duplicate with a new name** creates an independent ID and saves under a new name without deleting other presets.
+- **Restore previous copy** recalls the active preset from the previous valid archive revision; check and save it to apply it on startup.
+- **Reset geometry and mask** asks for confirmation and keeps the video and other presets; the operation can be undone.
+- **System** provides diagnostics, configuration/log export, PIN changes with verification of the old PIN, licenses and kiosk status.
 
-Dalla proiezione tenere premuto per **3 secondi nell'angolo alto sinistro**, oppure usare **Ctrl + M**, quindi inserire il PIN. Il PIN dimenticato richiede intervento tecnico sullo storage privato; non c'è un codice universale di sblocco. Uscire sempre con «Solo proiezione» dopo la manutenzione.
+From projection, **hold the top-left corner for 3 seconds**, or press **Ctrl + M**, then enter the PIN. A forgotten PIN requires technical intervention in private storage; there is no universal unlock code. Always leave maintenance using **Projection only**.
 
-Storage privato sotto `getApplicationSupportDirectory()/player/`:
+Private storage under `getApplicationSupportDirectory()/player/`:
 
 ```text
-media/                  file importati con nomi gestiti dall'app
-presets.json            archivio schema 1 con preset attivo e libreria
-presets.backup.json     precedente snapshot valido
-access.json             credenziali locali, escluse dagli export
-logs/player*.log        cinque file da circa 1 MiB ciascuno
+media/                  imported files with app-managed names
+presets.json            schema 1 archive with active preset and library
+presets.backup.json     previous valid snapshot
+access.json             local credentials, excluded from exports
+logs/player*.log        five files of approximately 1 MiB each
 ```
 
-I preset vengono validati e scritti su temporaneo con flush e rename. Una primaria corrotta viene recuperata dal backup, senza copiarla sopra l'unica copia valida al salvataggio successivo. Media mancanti, configurazione invalida e decoder in errore producono **nero nell'output pubblico**; la diagnosi si legge dopo l'accesso del personale. Gli aggiornamenti installati con lo stesso ID/firma preservano i dati; disinstallazione o cancellazione dati li rimuovono. I media importati non vengono eliminati automaticamente perché possono essere riferiti da altri preset o backup.
+Presets are validated and written to a temporary file with flush and rename. A corrupt primary archive is recovered from the backup without overwriting the only valid copy on the next save. Missing media, invalid configuration and decoder errors produce **black on the public output**; diagnostics are available after staff access. Updates installed with the same ID/signature preserve data; uninstalling or clearing app data removes it. Imported media are not deleted automatically because other presets or backups may reference them.
 
-L'esportazione crea in un isolate uno ZIP con preset salvati, bozza e log. Esclude PIN e video: copiare separatamente i master per avere un backup completo. Il pannello di condivisione Android viene aperto su richiesta; l'app non invia automaticamente ad alcuna destinazione. La versione 1 non offre un importatore ZIP: per ripristini completi serve intervento tecnico a app chiusa.
+Export creates a ZIP in an isolate containing saved presets, the draft (`draft.json`) and logs. It excludes the PIN and videos: copy the masters separately for a complete backup. The Android share sheet opens on request; the app does not automatically send anything to a destination. Version 1 has no ZIP importer: a full restore requires technical intervention with the app closed.
 
-## Riproduzione e output
+## Playback and output
 
-`video_player` **2.14.1**, backend Android **2.12.2**, vista texture. Loop nativo; timeline, play/pausa, mute e volume. Il comando di pausa viene rispettato quando si ritorna dal selettore file o dal background; autoplay decide soltanto lo stato iniziale di un video appena aperto. Con loop disattivato, Riproduci riavvia un video terminato con un solo clic.
+`video_player` **2.14.1**, Android backend **2.12.2**, texture view. Native loop playback, timeline, play/pause, mute and volume. A pause command is respected when returning from the file picker or background; autoplay only determines the initial state of a newly opened video. With loop disabled, **Play** restarts a completed video with a single click.
 
-Il watchdog controlla l'avanzamento ogni secondo: oltre 5 secondi senza progresso, esclusi pausa, sospensione, buffering dichiarato e completamento, reinizializza il backend. Massimo tre recuperi, attese 1/2/4 secondi, poi nero e diagnosi. Mantiene l'intento play/pausa anche durante il recupero. Un loop che riporta la posizione all'inizio conta come avanzamento. Per riprovare manualmente un errore definitivo, caricare nuovamente un preset o importare il media corretto.
+The watchdog checks progress every second. After more than 5 seconds without progress, excluding pause, suspension, reported buffering and completion, it reinitializes the backend. It allows at most three recoveries with delays of 1/2/4 seconds, then shows black and records diagnostics. It preserves play/pause intent during recovery. A loop returning the position to the beginning counts as progress. To retry a terminal error manually, reload a preset or import the correct media.
 
-La calibrazione memorizza raster fisico e identità/configurazione del display. Un cambio di dimensioni o identità rende nero l'output pubblico e mostra un avviso in manutenzione: verificare e confermare **Ricalibra output**, poi salvare. La conferma riferisce le coordinate normalizzate al nuovo raster; non certifica l'allineamento fisico. Gestione HDMI e refresh richiedono comunque prova sul dispositivo definitivo.
+Calibration stores the physical raster and display identity/configuration. A size or identity change makes the public output black and shows a maintenance warning: check and confirm **Recalibrate output**, then save. Confirmation maps the normalized coordinates to the new raster; it does not certify physical alignment. HDMI and refresh behavior still require testing on the final device.
 
-L'app usa landscape, immersive sticky, schermo acceso e Back gestito. Può richiedere lock task solo se un **DPC/device owner** autorizza il suo package. Non usa screen pinning come sostituto del kiosk. Configurare tramite il sistema di gestione avvio dopo accensione, launcher, notifiche, aggiornamenti e uscita autorizzata; non viene promesso un avvio automatico tramite un generico broadcast Android. Nessun secondo display indipendente, mesh warp, multi-proiettore, edge blending o sincronizzazione tra installazioni.
+The app uses landscape orientation, immersive sticky mode, a screen wake lock, and handles Back navigation. It can request lock task mode only if a **DPC/device owner** authorizes its package. It does not use screen pinning as a substitute for kiosk mode. Configure startup after power-on, the launcher, notifications, updates and authorized exit through the device management system; automatic startup via a generic Android broadcast is not promised. There is no independent second display, mesh warp, multi-projector support, edge blending or synchronization between installations.
 
-Formato di riferimento: MP4 H.264 4:2:0, Full HD progressivo, 25/30 fps costanti, AAC se presente. Il formato va certificato sul decoder effettivo; MOV, HEVC, AV1 e altri codec non hanno una garanzia universale. Riferimenti: [plugin ufficiale](https://pub.dev/packages/video_player), [formati Media3](https://developer.android.com/media/media3/exoplayer/supported-formats), [selettore file](https://pub.dev/packages/file_selector).
+Reference format: MP4 H.264 4:2:0, progressive Full HD, constant 25/30 fps, AAC if audio is present. Certify the format on the actual decoder; MOV, HEVC, AV1 and other codecs have no universal compatibility guarantee. References: [official plugin](https://pub.dev/packages/video_player), [Media3 formats](https://developer.android.com/media/media3/exoplayer/supported-formats), [file picker](https://pub.dev/packages/file_selector).
 
-## Screenshot
+## Screenshots
 
-Screenshot reali del test su emulatore Android 36 a 1920 × 1080:
+Actual screenshots from the Android 36 emulator test at 1920 × 1080:
 
-- [Prima configurazione](docs/screenshots/00-player-setup-android.png)
-- [Editor Bézier](docs/screenshots/02-player-maschera-bezier-android.png)
-- [Solo proiezione con ritaglio](docs/screenshots/03-player-proiezione-bezier-android.png)
-- [Calibrazione a quattro angoli](docs/screenshots/04-player-quattro-angoli-android.png)
+- [First setup](docs/screenshots/00-player-setup-android.png)
+- [Bézier editor](docs/screenshots/02-player-bezier-mask-android.png)
+- [Projection only with clipping](docs/screenshots/03-player-bezier-projection-android.png)
+- [Four-corner calibration](docs/screenshots/04-player-four-corners-android.png)
 
-## Verifica e licenze
+## Verification and licenses
 
 ```sh
 flutter analyze
 flutter test
 flutter drive --driver=test_driver/integration_driver.dart \
-  --target=integration_test/player_test.dart -d <id-emulatore>
-# Il test usa dati separati e il PIN di test non è un PIN predefinito.
-# Il drive produce un APK di test: ricompilare main.dart prima della consegna.
+  --target=integration_test/player_test.dart -d <emulator-id>
+# The test uses separate data; its test PIN is not a default PIN.
+# Drive produces a test APK: rebuild main.dart before handover.
 flutter build apk --debug --target lib/main.dart
 ```
 
-La verifica del progetto autonomo è riportata in [docs/validation.md](docs/validation.md). Il drive salva gli screenshot in `docs/screenshots/` e usa uno storage di test separato. Per riprodurre gli screenshot Full HD, su un emulatore dedicato impostare `adb -s <id-emulatore> shell wm size 1920x1080` e `adb -s <id-emulatore> shell wm density 160`; al termine ripristinare con gli stessi comandi usando `reset`. Non applicare questi comandi al dispositivo di proiezione. Prestazioni, sessioni prolungate, livello del nero, alimentazione e HDMI vanno verificati sul dispositivo e proiettore effettivi.
+Verification of the standalone project is recorded in [docs/validation.md](docs/validation.md). The drive saves screenshots in `docs/screenshots/` and uses separate test storage. To reproduce Full HD screenshots, set `adb -s <emulator-id> shell wm size 1920x1080` and `adb -s <emulator-id> shell wm density 160` on a dedicated emulator; restore both using the same commands with `reset` when finished. Do not apply these commands to the projection device. Performance, extended sessions, black level, power and HDMI must be tested on the actual device and projector.
 
-Il codice del progetto è distribuito con [licenza MIT](LICENSE). Il segnale video dimostrativo è generato tramite FFmpeg; non vengono inclusi filmati di terzi. Le dipendenze mantengono le rispettive licenze: consultare [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) e **Sistema → Licenze** nell’app.
+The project code is distributed under the [MIT license](LICENSE). The demo video signal is generated with FFmpeg; no third-party footage is included. Dependencies retain their respective licenses: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and **System → Licenses** in the app.
 
-## Struttura del progetto
+## Project structure
 
 ```text
-lib/app/             avvio, sessione e flusso operatore/proiezione
-lib/operator_ui/     pannelli Material e canvas di calibrazione
-lib/mapping/         trasformazioni, curve e undo/redo
-lib/output/          rendering e ritaglio dell’output
-lib/playback/        controller video, backend e watchdog
-lib/presets/         schema e persistenza dei preset
-lib/infrastructure/  import, PIN, log, export e bridge Android
-android/             host nativo, display e lock task
-assets/              segnale video dimostrativo e licenze native
-test/                test unitari e widget
-integration_test/    flusso completo con decoder Android reale
+lib/app/             startup, session and operator/projection flow
+lib/operator_ui/     Material panels and calibration canvas
+lib/mapping/         transforms, curves and undo/redo
+lib/output/          output rendering and clipping
+lib/playback/        video controller, backend and watchdog
+lib/presets/         preset schema and persistence
+lib/infrastructure/  import, PIN, logs, export and Android bridge
+android/             native host, display and lock task
+assets/              demo video signal and native licenses
+test/                unit and widget tests
+integration_test/    complete flow with the actual Android decoder
 ```
 
-Per contribuire: eseguire `dart format lib test integration_test test_driver`, `flutter analyze` e `flutter test` prima di aprire una pull request. Per modifiche a riproduzione o bridge nativo eseguire anche il test Android. Non includere video personali, preset reali, credenziali, chiavi di firma o log del dispositivo nelle pull request.
+To contribute, run `dart format lib test integration_test test_driver`, `flutter analyze` and `flutter test` before opening a pull request. For playback or native bridge changes, also run the Android test. Do not include personal videos, real installation presets, credentials, signing keys or device logs in pull requests.

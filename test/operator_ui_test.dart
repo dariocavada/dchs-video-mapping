@@ -42,7 +42,7 @@ void main() {
       await tester.pumpWidget(PlayerApp(session: session));
       await tester.pump();
       final paragraph = find.text(
-        'Imposta un PIN del personale, importa il video e calibra la superficie. Il filmato incluso è dimostrativo.',
+        'Set a staff PIN, import a video and calibrate the surface. The included video is a demo.',
       );
       final style = tester.renderObject<RenderParagraph>(paragraph).text.style!;
       final theme = Theme.of(tester.element(paragraph));
@@ -100,9 +100,7 @@ void main() {
       final input = find.byKey(const ValueKey('dialog-input'));
       expect(tester.getSize(input).height, greaterThan(40));
       final title = tester
-          .renderObject<RenderParagraph>(
-            find.text('Imposta il PIN della postazione'),
-          )
+          .renderObject<RenderParagraph>(find.text('Set the installation PIN'))
           .text
           .style!;
       expect(
@@ -112,8 +110,8 @@ void main() {
     } finally {
       tester.view.resetViewInsets();
       await tester.pump();
-      if (find.text('Annulla').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Annulla'));
+      if (find.text('Cancel').evaluate().isNotEmpty) {
+        await tester.tap(find.text('Cancel'));
       }
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 300));
@@ -135,7 +133,7 @@ void main() {
           ))!,
           e = MappingEditor(
             ProjectionPreset.initial().copyWith(
-              label: 'Calibrazione della superficie con un nome abbastanza lungo da verificare il layout',
+              label: 'Surface calibration with a name long enough to check the layout',
               mediaPath: 'media/video-1792087466123456.mp4',
             ),
           ),
@@ -151,9 +149,9 @@ void main() {
             onImport: () async {},
             onPreset: (_) async {},
             onSystem: (_) async {},
-            status: 'Pronto',
+            status: 'Ready',
             outputWarning:
-                'Output cambiato: 1920 × 1080. Verificare la calibrazione.',
+                'Output changed: 1920 × 1080. Check the calibration.',
             onAcceptOutput: () {},
           ),
         ),

@@ -25,15 +25,53 @@ Future<void> main() async {
       ], await rootBundle.loadString('assets/licenses/ANDROIDX-MEDIA3.txt'));
     }
   });
+  final player = _openPlayer();
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    runApp(
+      FutureBuilder<Widget>(
+        future: player,
+        builder: (context, snapshot) =>
+            snapshot.data ?? const _AndroidLoading(),
+      ),
+    );
+  } else {
+    runApp(await player);
+  }
+}
+
+Future<Widget> _openPlayer() async {
   try {
     final support = await getApplicationSupportDirectory();
     final session = await PlayerSession.open(
       Directory('${support.path}/player'),
     );
-    runApp(PlayerApp(session: session));
+    return PlayerApp(session: session);
   } catch (e) {
-    runApp(_StartupFailure(e));
+    return _StartupFailure(e);
   }
+}
+
+class _AndroidLoading extends StatelessWidget {
+  const _AndroidLoading();
+
+  @override
+  Widget build(BuildContext context) => const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Text(
+          'CavadaLabs',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 42,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _StartupFailure extends StatelessWidget {

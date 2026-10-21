@@ -28,6 +28,24 @@ Android APK: `build/app/outputs/flutter-apk/app-debug.apk`. Android application 
 
 This command produces a debug APK. Configure signing and the target device before distributing the app. The `release` configuration still uses the debug key: do not distribute it as a production-signed release. Set up your own signing key before distribution; keep the keystore and `key.properties` out of the repository.
 
+### X96 X10Pro with Android 11
+
+On the physically tested `X96_X10Pro` (Amlogic, API 30), the firmware limits video texture output to 14 buffers. Flutter's ImageReader path requires at least 18 and fails to initialize `OMX.amlogic.avc.decoder.awesome2`, even though the decoder reports the Full HD H.264 format as supported. This matches the class of device incompatibility tracked in [Flutter issue 155355](https://github.com/flutter/flutter/issues/155355).
+
+The Android host selects GLES and SurfaceTexture on this exact model/OS combination, preserving a compositable texture for geometry and Bézier clipping. This compatibility path uses Flutter's `debugForceSurfaceProducerGlTextures` testing API, and Impeller opt-out is deprecated: revalidate both on Flutter engine upgrades. The original demo remains H.264 High, 1920 × 1080, 25 fps. `integration_test/android_box_playback_test.dart` checks native initialization, advancing playback, two loops and seeking using temporary files, without setting a staff PIN.
+
+### Automatic startup on Android
+
+In the PIN-protected **System** tab, enable **Start automatically when the box turns on**. Confirm **DCHS Video Mapping** as the Home app in Android's dialog. The checkbox reflects the actual Home selection and any required permission; cancelling the setup leaves it unchecked. Android then launches the player as Home after boot, and the player loads its saved preset. This requires a device that permits choosing its Home app; verify it with a real reboot on the intended firmware.
+
+The tested X96 X10Pro firmware explicitly opens its factory launcher at boot even when another Home is selected. On this exact Android 11 model, setup also requests **Display over other apps**: open the DCHS Video Mapping entry, allow access, then go back to the player. If Android asks which Settings app to use, choose the entry labelled **Display over other apps**. The permission allows the `BOOT_COMPLETED` fallback to open the selected player under Android 11's [background activity restrictions](https://developer.android.com/guide/components/activities/secure-bal); the player creates no overlay windows. This extra permission is not requested on other models. A real reboot on the tested box confirmed automatic startup with the saved video and mask.
+
+**Home** returns to the player while this option is active. **Open Android home** in the same staff panel opens the previous launcher without disabling automatic startup. Uncheck the option to remove the player's optional Home entry; Android can then use another launcher. A managed kiosk must be exited using its administrator's procedure before changing Home settings.
+
+Android displays a temporary **CavadaLabs** wordmark on black while the player's local data opens. This is the app's loading screen; the firmware boot logo is separate. The controls and branding are Android-only.
+
+Standby is separate from a full boot. When the player returns to the foreground, its existing lifecycle handler resumes playback and checks the output again. It does not launch over another app whenever the screen turns on. Screen-on events cannot be received through a manifest-only receiver and do not guarantee restarting a terminated process; see Android's [broadcast documentation](https://developer.android.com/develop/background-work/background-tasks/broadcasts).
+
 ### macOS
 
 ```sh
@@ -126,7 +144,7 @@ The watchdog checks progress every second. After more than 5 seconds without pro
 
 Calibration stores the physical raster and display identity/configuration. A size or identity change makes the public output black and shows a maintenance warning: check and confirm **Recalibrate output**, then save. Confirmation maps the normalized coordinates to the new raster; it does not certify physical alignment. HDMI, external adapters, mirroring and refresh behavior still require testing on the final device. On Mac, calibration uses the physical pixels of the app content area, so enter full screen on the target display first.
 
-On Android, the app uses landscape orientation, immersive sticky mode, a screen wake lock, and handles Back navigation. It can request lock task mode only if a **DPC/device owner** authorizes its package. It does not use screen pinning as a substitute for kiosk mode. Configure startup after power-on, the launcher, notifications, updates and authorized exit through the device management system; automatic startup via a generic Android broadcast is not promised. There is no independent second display, mesh warp, multi-projector support, edge blending or synchronization between installations.
+On Android, the app uses landscape orientation, immersive sticky mode, a screen wake lock, and handles Back navigation. The optional Home selection described above provides startup after power-on; it does not lock the device. The app can request lock task mode only if a **DPC/device owner** authorizes its package. It does not use screen pinning as a substitute for kiosk mode. Configure notifications, updates and authorized kiosk exit through the device management system. There is no independent second display, mesh warp, multi-projector support, edge blending or synchronization between installations.
 
 Reference format: MP4 H.264 4:2:0, progressive Full HD, constant 25/30 fps, AAC if audio is present. Certify the format on the actual decoder; MOV, HEVC, AV1 and other codecs have no universal compatibility guarantee. References: [official plugin](https://pub.dev/packages/video_player), [Media3 formats](https://developer.android.com/media/media3/exoplayer/supported-formats), [file picker](https://pub.dev/packages/file_selector).
 

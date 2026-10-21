@@ -8,6 +8,7 @@ import '../mapping/mask.dart';
 import '../presets/preset.dart';
 import '../playback/playback_controller.dart';
 import 'keyboard_shortcuts.dart';
+import 'android_startup_settings.dart';
 import 'mapping_canvas.dart';
 import 'player_theme.dart';
 
@@ -721,35 +722,41 @@ class _OperatorScreenState extends State<OperatorScreen> {
       ),
     ],
   );
-  Widget _system() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      _title('Installation'),
-      _gap(),
-      _note(
-        'Calibrated output: ${e.draft.outputSize.width.toInt()} × ${e.draft.outputSize.height.toInt()}\n${e.draft.displayKey}',
-      ),
-      _gap(22),
-      PlayerButton(
-        'Diagnostics and logs',
-        onPressed: () => widget.onSystem('diagnostics'),
-      ),
-      _gap(),
-      PlayerButton(
-        'Export configuration and logs',
-        onPressed: () => widget.onSystem('export'),
-      ),
-      _gap(),
-      PlayerButton('Change staff PIN', onPressed: () => widget.onSystem('pin')),
-      _gap(),
-      PlayerButton('Licenses', onPressed: () => widget.onSystem('licenses')),
-      _gap(),
-      PlayerButton('Kiosk status', onPressed: () => widget.onSystem('kiosk')),
-      _gap(24),
-      _note(
-        'Access from projection: hold the top-left corner for 3 seconds, or press Ctrl + M (⌘ + M on Mac), then enter the PIN.',
-      ),
-    ],
+  Widget _system() => SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _title('Installation'),
+        _gap(),
+        _note(
+          'Calibrated output: ${e.draft.outputSize.width.toInt()} × ${e.draft.outputSize.height.toInt()}\n${e.draft.displayKey}',
+        ),
+        _gap(22),
+        const AndroidStartupSettings(),
+        PlayerButton(
+          'Diagnostics and logs',
+          onPressed: () => widget.onSystem('diagnostics'),
+        ),
+        _gap(),
+        PlayerButton(
+          'Export configuration and logs',
+          onPressed: () => widget.onSystem('export'),
+        ),
+        _gap(),
+        PlayerButton(
+          'Change staff PIN',
+          onPressed: () => widget.onSystem('pin'),
+        ),
+        _gap(),
+        PlayerButton('Licenses', onPressed: () => widget.onSystem('licenses')),
+        _gap(),
+        PlayerButton('Kiosk status', onPressed: () => widget.onSystem('kiosk')),
+        _gap(24),
+        _note(
+          'Access from projection: hold the top-left corner for 3 seconds, or press Ctrl + M (⌘ + M on Mac), then enter the PIN.',
+        ),
+      ],
+    ),
   );
   @override
   Widget build(BuildContext context) => Scaffold(

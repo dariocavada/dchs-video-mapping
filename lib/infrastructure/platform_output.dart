@@ -1,5 +1,16 @@
 import 'package:flutter/services.dart';
 
+class AndroidStartupState {
+  const AndroidStartupState({
+    this.supported = false,
+    this.enabled = false,
+    this.requiresDisplayPermission = false,
+  });
+  final bool supported;
+  final bool enabled;
+  final bool requiresDisplayPermission;
+}
+
 class PlatformOutput {
   static const channel = MethodChannel('dchs_video_mapping/platform');
   static Future<String> displayKey() async {
@@ -18,4 +29,23 @@ class PlatformOutput {
       return false;
     }
   }
+
+  static Future<AndroidStartupState> startup({bool? enabled}) async {
+    try {
+      final state = await channel.invokeMapMethod<String, dynamic>(
+        enabled == null ? 'startupStatus' : 'startupSet',
+        enabled == null ? null : {'enabled': enabled},
+      );
+      return AndroidStartupState(
+        supported: state?['supported'] == true,
+        enabled: state?['enabled'] == true,
+        requiresDisplayPermission: state?['requiresDisplayPermission'] == true,
+      );
+    } on MissingPluginException {
+      return const AndroidStartupState();
+    }
+  }
+
+  static Future<void> openAndroidHome() =>
+      channel.invokeMethod('openAndroidHome');
 }

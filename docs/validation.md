@@ -43,8 +43,30 @@ The standard Mac app was launched and hot reload succeeded. Setup, affine, Bézi
 
 An integration run builds a test app. Rebuild the standard `lib/main.dart` target before handover. Run iOS build and integration commands sequentially because they share generated Xcode configuration.
 
+## Physical X96 X10Pro check — October 20, 2026
+
+- Target: `X96_X10Pro`, Android 11 / API 30, Amlogic `s5`, 32-bit `armeabi-v7a`, physical output 1920 × 1080. Connected over Wi-Fi ADB.
+- Reproduced the original demo failure on the device and in `android_box_playback_test.dart`: `OMX.amlogic.avc.decoder.awesome2` rejected output buffer counts 18–21 because its non-HWC output limit is 14. Disabling Impeller alone did not fix it.
+- The host now selects GLES plus SurfaceTexture only for this exact model/OS/hardware combination. With that change, the same native playback test passed: original H.264 High Full HD demo, advancing playback, two loops, pause and seek. An ADB screenshot showed the rendered test signal at 1.8 seconds. No transcoding or platform view was needed.
+- `flutter analyze`: no issues. `flutter test`: all 33 unit/widget tests passed.
+- The broader `player_test.dart` scenario stopped during PIN setup: `tab-mask` was still absent after its bounded wait. It did not establish physical mapping, mask, import or preset validation on this box. The video-only test above passed independently.
+- Rebuilt the regular `lib/main.dart` release APK with `--build-number=6`; it retains the project's local debug signing configuration. Logs and device screenshots for this run are under the ignored `build/diagnostics/` directory.
+
+The compatibility switch is an internal Flutter testing API, and GLES opt-out is deprecated. Recheck initialization, rendered frames and loop playback on this device when upgrading Flutter; the workaround is not a claim of compatibility for all Amlogic boxes.
+
+## Android startup and loading screen — October 20, 2026
+
+- Added Android-only System controls for selecting the player as Home and opening the previous launcher, plus a temporary CavadaLabs wordmark while app data loads. Other platforms hide these controls.
+- `flutter test`: all 38 unit/widget tests passed, including pending/cancelled Home selection, unsupported platforms, special-permission guidance and the Android loading screen. `flutter analyze`: no issues.
+- Physical native Home tests verified cancellation, acceptance, opening the previous launcher and disabling the Home entry. A forwarding Home activity reuses the existing player task instead of starting a second Flutter engine.
+- Two initial reboot checks exposed firmware behavior: UID 0 explicitly opens `com.yxt.launcher`, ignoring the selected Home; a `BOOT_COMPLETED` receiver runs, but Android rejects its background activity start without the special permission.
+- The affected-model setup now requests `SYSTEM_ALERT_WINDOW` through Android Settings and checks `Settings.canDrawOverlays` before reporting startup enabled. No overlay window is created. The physical integration test passed with Home selection and the permission granted through the system UI.
+- Reinstalled the standard `lib/main.dart` release APK, build number 12, in place, preserving the application UID and local data. A real reboot changed the boot ID and automatically opened `MainActivity` without an ADB launch command. The system log explicitly allowed the background start because `SYSTEM_ALERT_WINDOW` was granted. A screenshot showed the saved user video with its curved mask.
+- Local evidence is in ignored `build/diagnostics/android-startup-test.log` and `android-reboot-with-permission.{json,log,png}`. The generic Home approach remains firmware-dependent; this result establishes startup on the tested X96 X10Pro only.
+- The subsequent standby check could not yet be completed because the box stopped responding on the network before the sleep command was sent. The existing foreground-resume handler is present; physical wake behavior remains to be verified.
+
 ## Remaining hardware and distribution checks
 
-Physical HDMI/adapters, external mirroring, projector alignment, device restart, managed kiosk setup and extended playback require the final hardware. iPhone/iPad validation here uses simulators. The app has one output window; there is no independent second projector window.
+Physical HDMI/adapters, external mirroring, projector alignment, standby/wake, managed kiosk setup and extended playback require further final-hardware checks. Restart was verified on the X96 X10Pro as described above. iPhone/iPad validation here uses simulators. The app has one output window; there is no independent second projector window.
 
 Android release still uses debug signing. Mac distribution signing/notarization and iOS distribution provisioning/App Store submission are not configured or verified. These source changes do not constitute an App Store or notarized binary release.
